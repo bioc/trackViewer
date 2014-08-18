@@ -1,11 +1,11 @@
 Package: trackViewer
 Type: Package
 Title: light package to plot elegant track layers
-Version: 1.0.0
-Date: 2014-4-3
+Version: 1.0.1
+Date: 2014-8-18
 Author: Jianhong Ou, Yong-Xu Wang, Lihua Julie Zhu
 Maintainer: Jianhong Ou <jianhong.ou@umassmed.edu>
-Description: plot ChIP-seq, RNA-seq, miRNA-seq, DNA-seq and etc NGS sequence data, especially for big files.
+Description: visualize mapped reads along with annotation as track layers for NGS dataset such as ChIP-seq, RNA-seq, miRNA-seq, DNA-seq.
 License: GPL (>= 2)
 Depends: R (>= 3.1.0), methods, GenomicRanges, grid, gWidgetstcltk
 Imports: GenomicAlignments, GenomicFeatures, Gviz, pbapply, Rsamtools,
