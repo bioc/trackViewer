@@ -1,3 +1,7 @@
+CHANGES IN VERSION 1.8.4
+-----------------------
+    o fix the bugs for the lolliplot when the last snp need to be jittered.
+    
 CHANGES IN VERSION 1.8.3
 -----------------------
     o update documentation to include the how to set ylim.
