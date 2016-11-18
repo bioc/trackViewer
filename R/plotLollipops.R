@@ -35,8 +35,8 @@ plotFeatures <- function(feature.splited, LINEH, bottomHeight){
                 if(length(this.dat$height)>0) 
                     this.dat$height[[1]][1] else 
                         2*this.feature.height
-            grid.rect(x=start(this.dat), y=bottomHeight+feature.height, 
-                      width=width(this.dat), 
+            grid.rect(x=start(this.dat)-.1, y=bottomHeight+feature.height, 
+                      width=width(this.dat)-.8, 
                       height=this.feature.height.m,
                       just="left", gp=gpar(col=color, fill=fill), 
                       default.units = "native")
@@ -165,9 +165,9 @@ plotLollipops <- function(SNPs, feature.height, bottomHeight, baseline,
                                         colnames(this.dat.mcols)), 
                                drop=FALSE]
 
-            grid.lollipop(x1=(start(this.dat)-start(ranges))/width(ranges), 
+            grid.lollipop(x1=convertX(unit(start(this.dat), "native"), "npc", valueOnly=TRUE), 
                           y1=baseline,
-                          x2=(lab.pos[m]-start(ranges))/width(ranges), 
+                          x2=convertX(unit(lab.pos[m], "native"), "npc", valueOnly=TRUE), 
                           y2=feature.height,
                           y3=4*GAP*cex, y4=2.5*GAP*cex, 
                           radius=cex*LINEW/2,
