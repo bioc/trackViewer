@@ -180,6 +180,9 @@ setClass("yaxisStyle",
 #' @slot ylabgp A \code{"list"} object, It will convert to an object of 
 #' class \code{\link[grid]{gpar}}. This is basically a list of graphical 
 #' parameter settings of y-label.
+#' @slot ysplit A \code{"numeric"} to split y plot region for interaction data.
+#' Default is 0.5, which will split the region half to half. It will only work
+#' for back to back plot.
 #' @exportClass trackStyle
 #'
 
@@ -196,7 +199,8 @@ setClass("trackStyle",
                         ylim="numeric",
                         ylabpos="character",
                         ylablas="numeric",
-                        ylabgp="list"
+                        ylabgp="list",
+                        ysplit="numeric"
                         ),
          prototype(
              marginTop=0,
@@ -207,7 +211,8 @@ setClass("trackStyle",
              tracktype="peak",
              ylabpos="left",
              ylablas=0,
-             ylabgp=list()
+             ylabgp=list(),
+             ysplit=0.5
          ),
          validity=function(object){
              if(!object@ylabpos %in% c("left", "right", "topleft", "bottomleft", 
@@ -218,7 +223,7 @@ setClass("trackStyle",
                         'abovebaseline' or 'underbaseline'.")
              if(!(object@ylablas %in% 0:3))
                 return("ylas should be numeric in {0,1,2,3}. See ?par")
-             if(!object@tracktype %in% c("peak", "cluster", "heatmap", "link"))
+             if(!all(object@tracktype %in% c("peak", "cluster", "heatmap", "link")))
                  return("tracktype must be on of peak, cluster, heatmap or link")
              return(TRUE)
          }
@@ -410,7 +415,7 @@ setMethod("setTrackStyleParam",
           function(ts, attr, value){
               if(!attr %in% c("tracktype", "color", "height", "marginTop", 
                               "marginBottom", "ylim", "ylabpos", "ylablas",
-                              "ylabgp", "breaks", "NAcolor"))
+                              "ylabgp", "breaks", "NAcolor", 'ysplit'))
                   stop("attr must be a slot name (except xscale and yaxis) of trackStyle.
                        try setTrackXscaleParam for xscale slot and 
                        setTrackYaxisParam for yaxis.")

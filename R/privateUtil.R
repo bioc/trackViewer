@@ -421,47 +421,68 @@ putYlab <- function(curViewStyle, style, name, yHeightBottom, yHeightTop, height
 }
 
 drawYaxis <- function(ylim, yaxisStyle, curViewStyle, heatlegends=list()){
-    if(yaxisStyle@main){
-        vp <- viewport(x=curViewStyle@margin[2] * .2, 
-                       width=curViewStyle@margin[2] *.4,
-                       y=0, height=1, clip="off",
-                       just=c(0,0), yscale=ylim)
-    }else{
-        vp <- viewport(x=curViewStyle@margin[2], 
-                       width=1 - curViewStyle@margin[2] - curViewStyle@margin[4],
-                       y=0, height=1, clip="off", just=c(0,0), yscale=ylim)
-    }
     gp <- yaxisStyle@gp
     class(gp) <- "gpar"
-    pushViewport(vp)
     if(length(heatlegends)){
       width <- ifelse(yaxisStyle@main, .3,
                       curViewStyle@margin[4]/4)
       x <- ifelse(yaxisStyle@main, 1.15, 1+curViewStyle@margin[4]/8)
-      grid.raster(rev(heatlegends$crp), x=x, width=width, height=1)
-      # map breaks to ylim
-      if(heatlegends$userdefinedbreaks){
-        at <- seq(ylim[1], ylim[2], length.out=length(heatlegends$breaks))
-        label <- heatlegends$breaks
-      }else{
-        at <- ylim
-        label <- range(heatlegends$breaks)
-      }
-      tryCatch({
-        dif <- rle(diff(label))$lengths
-        w <- c(1, 1+cumsum(dif))
-        at <- at[w]
-        label <- label[w]
-      }, error=function(.e){}, warning=function(.w){})
-      tryCatch({
-        if(any(label%%1!=0)){
-          label <- formatC(label, format = "fg")
+      for(i in seq_along(heatlegends$breaks)){
+        if(yaxisStyle@main){
+          vp <- viewport(x=curViewStyle@margin[2] * .2, 
+                         width=curViewStyle@margin[2] *.4,
+                         y=ifelse(i==1, 1-heatlegends$ysplit*.8, 0),
+                         height=ifelse(i==1, heatlegends$ysplit, 1-heatlegends$ysplit)*.8,
+                         clip="off",
+                         just=c(0,0), yscale=ylim)
+        }else{
+          vp <- viewport(x=curViewStyle@margin[2], 
+                         width=1 - curViewStyle@margin[2] - curViewStyle@margin[4],
+                         y=ifelse(i==1, 1-heatlegends$ysplit*.8, 0),
+                         height=ifelse(i==1, heatlegends$ysplit, 1-heatlegends$ysplit)*.8,
+                         clip="off", 
+                         just=c(0,0), yscale=ylim)
         }
-      }, error=function(.e){}, warning=function(.w){})
-      grid.yaxis(at=at, label = label,
-                 main=FALSE, gp=gp,
-                 draw=yaxisStyle@draw)
+        pushViewport(vp)
+        grid.raster(rev(heatlegends$crp[[i]]), x=x, width=width, height=1)
+        # map breaks to ylim
+        if(heatlegends$userdefinedbreaks){
+          this_breaks <- heatlegends$breaks[[i]]
+          at <- seq(ylim[1], ylim[2],
+                    length.out=length(this_breaks))
+          label <- this_breaks
+        }else{
+          at <- ylim
+          label <- range(heatlegends$breaks[[i]])
+        }
+        tryCatch({
+          dif <- rle(diff(label))$lengths
+          w <- c(1, 1+cumsum(dif))
+          at <- at[w]
+          label <- label[w]
+        }, error=function(.e){}, warning=function(.w){})
+        tryCatch({
+          if(any(label%%1!=0)){
+            label <- formatC(label, format = "fg")
+          }
+        }, error=function(.e){}, warning=function(.w){})
+        grid.yaxis(at=at, label = label,
+                   main=FALSE, gp=gp,
+                   draw=yaxisStyle@draw)
+        popViewport()
+      }
     }else{
+      if(yaxisStyle@main){
+        vp <- viewport(x=curViewStyle@margin[2] * .2, 
+                       width=curViewStyle@margin[2] *.4,
+                       y=0, height=1, clip="off",
+                       just=c(0,0), yscale=ylim)
+      }else{
+        vp <- viewport(x=curViewStyle@margin[2], 
+                       width=1 - curViewStyle@margin[2] - curViewStyle@margin[4],
+                       y=0, height=1, clip="off", just=c(0,0), yscale=ylim)
+      }
+      pushViewport(vp)
       at <- unique(ylim)
       at <- at[order(at)]
       label <- yaxisStyle@label
@@ -470,8 +491,8 @@ drawYaxis <- function(ylim, yaxisStyle, curViewStyle, heatlegends=list()){
       }
       grid.yaxis(at=at, label=label, main=FALSE, gp=gp,
                  draw=yaxisStyle@draw)
+      popViewport()
     }
-    popViewport()
 }
 
 drawXscale <- function(scale){

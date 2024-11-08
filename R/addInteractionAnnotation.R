@@ -186,10 +186,11 @@ addInteractionAnnotation <- function(obj, idx, FUN=grid.polygon,
                           xscale=xscale, 
                           yscale=sort(yscales[[i]])))
     if(.dat2target[i]){## two interaction heatmap, back to back
+      ysplit <- lastTrackViewer$back2back['ysplit', i, drop=TRUE][1]
       ## top triangle
       if("top" %in% panel){
-        pushViewport(viewport(x=0, y=.5, 
-                              height=.5, 
+        pushViewport(viewport(x=0, y=1-ysplit, 
+                              height=ysplit, 
                               width=1, 
                               clip="on",
                               default.units = "npc",
@@ -202,7 +203,7 @@ addInteractionAnnotation <- function(obj, idx, FUN=grid.polygon,
       if("bottom" %in% panel){
         ## bottom triangle
         pushViewport(viewport(x=0, y=0, 
-                              height=.5, 
+                              height=1-ysplit, 
                               width=1, 
                               clip="on", 
                               default.units = "npc",

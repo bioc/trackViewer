@@ -1,5 +1,10 @@
 plotInteractionDataTrack <- function(.dat, .dat2, scale, color, yscale, breaks,
-                                     NAcolor="white", style="heatmap"){
+                                     NAcolor="white",
+                                     style="heatmap", ysplit=.5){
+  if(length(style)==1){
+    style <- rep(style, 2)
+  }
+  ysplit <- ysplit[1]
   names(.dat) <- NULL
   ## if there is target metadata
   .dat1target <- NULL
@@ -32,21 +37,29 @@ plotInteractionDataTrack <- function(.dat, .dat2, scale, color, yscale, breaks,
   ## color = colorRampPalette(color)(100)
   if(length(breaks)<3){
     if(length(.dat2target)>0){
-      rg <- range(c(.dat$score[!is.na(.dat$score)], 
-                    .dat2$score[!is.na(.dat2$score)]))
+      if(style[2]==style[1]){
+        rg <- list(range(c(.dat$score[!is.na(.dat$score)], 
+                           .dat2$score[!is.na(.dat2$score)])))
+      }else{
+        rg <- list(range(.dat$score[!is.na(.dat$score)]),
+                   range(.dat2$score[!is.na(.dat2$score)]))
+      }
     }else{
-      rg <- range(.dat$score[!is.na(.dat$score)])
+      rg <- list(range(.dat$score[!is.na(.dat$score)]))
     }
-    if(length(rg)!=2){
-      return()
-    }
-    rg <- rg + c(-1, 1)*diff(rg)/1000
-    if(rg[1]==rg[2] && rg[1]==0){
-      rg[2] <- 1
-    }
-    breaks <- seq(min(0, rg[1]), rg[2], length.out = 101)
+    breaks <- lapply(rg, function(.rg){
+      if(length(.rg)!=2){
+        return()
+      }
+      .rg <- .rg + c(-1, 1)*diff(.rg)/1000
+      if(.rg[1]==.rg[2] && .rg[1]==0){
+        .rg[2] <- 1
+      }
+      seq(min(0, .rg[1]), .rg[2], length.out = 101)
+    })
     userdefinedbreaks <- FALSE
   }else{
+    breaks <- list(breaks, breaks)
     userdefinedbreaks <- TRUE
   }
   
@@ -60,15 +73,17 @@ plotInteractionDataTrack <- function(.dat, .dat2, scale, color, yscale, breaks,
   if(length(color)==0){
     color <- c("white", "red")
   }
-  crp <- colorRampPalette(color)(length(breaks)-1)
+  crp <- lapply(breaks, function(.breaks){
+    colorRampPalette(color)(length(.breaks)-1)
+  })
   ym <- (scale[2]-scale[1] + 1)/2
-  getMC <- function(scores){
+  getMC <- function(scores, breaks, crp){
     mc <- cut(scores, breaks = breaks, labels = crp)
     mc <- as.character(mc)
     mc[is.na(mc)] <- NAcolor
     mc
   }
-  plotInteractionHeatmap <- function(anchor1, anchor2){
+  plotInteractionHeatmap <- function(anchor1, anchor2, breaks, crp, f){
     xa <- (end(anchor1) + start(anchor2))/2
     xb <- (start(anchor1) + start(anchor2))/2
     xc <- (start(anchor1) + end(anchor2))/2
@@ -80,7 +95,7 @@ plotInteractionDataTrack <- function(.dat, .dat2, scale, color, yscale, breaks,
     irx <- inRange(xa, scale) | inRange(xb, scale) | inRange(xc, scale) | inRange(xd, scale)
     iry <- inRange(ya, yscale) | inRange(yb, yscale) | inRange(yc, yscale) | inRange(yd, yscale)
     xinr <- inRange(start(anchor1), scale) | inRange(end(anchor2), scale)
-    mc <- getMC(anchor1$score)
+    mc <- getMC(anchor1$score, breaks, crp)
     cols <- rep(NA, length(anchor1))
     if(length(anchor1$border_color)==length(anchor1) && length(anchor1)>0){
       cols <- anchor1$border_color
@@ -158,11 +173,13 @@ plotInteractionDataTrack <- function(.dat, .dat2, scale, color, yscale, breaks,
                  y=pts$y,
                  ...)
   }
-  plotInteractioLink <- function(anchor1, anchor2){
-    mc <- getMC(anchor1$score)
+  plotInteractioLink <- function(anchor1, anchor2, breaks, crp, f=1){
+    mc <- getMC(anchor1$score, breaks, crp)
+    anchor1$score[anchor1$score<0] <- 0
     hs <- sqrt(anchor1$score/
                 max(anchor1$score[!is.infinite(anchor1$score)], 
-                    na.rm = TRUE))
+                    na.rm = TRUE)) * f
+    hs[is.na(hs)] <- 0
     irx <- inRange(start(anchor1), scale) | inRange(end(anchor1), scale) |
       inRange(start(anchor2), scale) | inRange(end(anchor2), scale)
     for(i in seq_along(anchor1)){
@@ -177,39 +194,48 @@ plotInteractionDataTrack <- function(.dat, .dat2, scale, color, yscale, breaks,
       }
     }
   }
-  FUN = switch (tolower(style),
+  FUN = switch (tolower(style[1]),
     'heatmap' = plotInteractionHeatmap,
     'link' = plotInteractioLink,
     plotInteractionHeatmap
   )
   if(length(.dat2target)){## two interaction heatmap, back to back
     ## top triangle
-    pushViewport(viewport(x=0, y=.5, 
-                          height=.5, 
+    pushViewport(viewport(x=0, y=1-ysplit, 
+                          height=ysplit, 
                           width=1, 
                           clip="on",
                           default.units = "npc",
                           just=c(0,0), 
                           xscale=scale, 
                           yscale=yscale))
-    FUN(.dat, .dat1target)
+    FUN(.dat, .dat1target, breaks[[1]], crp[[1]], f=.5)
     popViewport()
+    FUN = switch (tolower(style[2]),
+                  'heatmap' = plotInteractionHeatmap,
+                  'link' = plotInteractioLink,
+                  plotInteractionHeatmap
+    )
     ## bottom triangle
     pushViewport(viewport(x=0, y=0, 
-                          height=.5, 
+                          height=1-ysplit, 
                           width=1, 
                           clip="on", 
                           default.units = "npc",
                           just=c(0,0), 
                           xscale=scale, 
                           yscale=rev(yscale)))
-    FUN(.dat2, .dat2target)
+    FUN(.dat2, .dat2target, breaks[[2]], crp[[2]], f=.5)
     popViewport()
   }else{
-    FUN(.dat, .dat1target)
+    FUN(.dat, .dat1target, breaks[[1]], crp[[1]])
   }
+  #if(style[2]==style[1]){ # now we can not set two different breaks and colors
+    breaks <- breaks[1]
+    crp <- crp[1]
+  #}
   # legend in y axis
-  return(list(crp=crp, breaks=breaks, userdefinedbreaks=userdefinedbreaks))
+  return(list(crp=crp, breaks=breaks, ysplit=ysplit, userdefinedbreaks=userdefinedbreaks))
   vp <- viewport(x = 1 - convertWidth(unit(5, "char"), "npc", valueOnly = TRUE), 
                  y= 1 - convertHeight(unit(1, "char"), "npc", valueOnly = TRUE), 
                  width = convertWidth(unit(5, "char"), "npc", valueOnly = TRUE),

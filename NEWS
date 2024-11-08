@@ -1,3 +1,7 @@
+Changes in version 1.43.1
+
+    o Make it possible to plot link for back2back interaction data.
+    
 Changes in version 1.41.10
 
     o Improve the plot speed for interaction data.

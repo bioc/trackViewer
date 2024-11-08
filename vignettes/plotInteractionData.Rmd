@@ -119,6 +119,26 @@ heatmap$dat2 <- heatmap$dat2[keep]
 viewTracks(trackList(heatmap), gr=range, autoOptimizeStyle = TRUE)
 ```
 
+Plot links with heatmap.
+
+```{r plotHeatmapLink, fig.width=6, fig.height=4}
+heatmapLinks <- gi2track(gi, gi2[keep])
+## change the color
+setTrackStyleParam(heatmapLinks, "breaks", 
+                   c(seq(from=0, to=50, by=10), 200))
+setTrackStyleParam(heatmapLinks, "color",
+                   c("lightblue", "yellow", "red"))
+## chang the lim of y-axis (by default, [0, 1])
+setTrackStyleParam(heatmapLinks, "ylim", c(0, .5))
+setTrackStyleParam(heatmapLinks, "tracktype", c("heatmap", "link"))
+setTrackStyleParam(heatmapLinks, "ysplit", 0.75) # heatmap space 75% of height
+viewTracks(trackList(heatmapLinks), gr=range, autoOptimizeStyle = TRUE)
+addInteractionAnnotation(tads, "heatmapLinks", grid.lines,
+                         gp=gpar(col="cyan", lwd=3, lty=2), panel='top')
+addInteractionAnnotation(-52208000, "heatmapLinks", gp=gpar(col="blue", lwd=3),
+                         panel="top")
+```
+
 
 To import interactions data from ".hic" (reference to 
 the script of [hic-straw](https://github.com/aidenlab/straw) and the

@@ -110,6 +110,10 @@ be a integer 0-3. See \code{\link[graphics]{par}:las}}
 class \code{\link[grid]{gpar}}. This is basically a list of graphical 
 parameter settings of y-label.}
 
+\item{\code{ysplit}}{A \code{"numeric"} to split y plot region for interaction data.
+Default is 0.5, which will split the region half to half. It will only work
+for back to back plot.}
+
 \item{\code{dat}}{Object of class \code{\link[GenomicRanges:GRanges-class]{GRanges}}
 the scores of a given track. It should contain score metadata.}
 

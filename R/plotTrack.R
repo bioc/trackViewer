@@ -305,7 +305,8 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
                                                       style@color, yscale=yscale, 
                                                       breaks=style@breaks, 
                                                       NAcolor=style@NAcolor,
-                                                      style=style@tracktype)
+                                                      style=style@tracktype,
+                                                      ysplit=style@ysplit)
               popViewport()## for interactionData
               ##plot yaxis
               drawYaxis(yscale, style@yaxis, curViewStyle, heatlegends)

@@ -319,8 +319,9 @@ viewTracks <- function(trackList, chromosome, start, end, strand, gr=GRanges(),
                                  c(score1=length(.ele$dat$score),
                                    score2=length(.ele$dat2$score),
                                    target1=length(.ele$dat$target),
-                                   target2=length(.ele$dat$target))
-                               }, FUN.VALUE = numeric(4L))))
+                                   target2=length(.ele$dat$target),
+                                   ysplit=.ele$style$ysplit)
+                               }, FUN.VALUE = numeric(5L))))
   return(invisible(viewport(x=margin[2], y=margin[1], 
                             height=1 - margin[1]- margin[3], 
                             width=1 -margin[2] - margin[4],
