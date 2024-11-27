@@ -150,6 +150,27 @@ plotDataTrack <- function(.dat, chr, strand, scale, color, yscale, smooth=FALSE)
     }
     return(list(x=xt, y=yt))
 }
+plotAnnotationTrack <- function(.dat, chr, strand, scale, color){
+  .dat <- subsetByOverlaps(.dat, GRanges(chr, IRanges(scale[1], scale[2]), strand=strand))
+  if(length(.dat)){
+    if(length(.dat$score)==length(.dat)){
+      if(length(unique(.dat$score))>1){
+        ## map color
+        if(length(.dat$color)!=length(.dat)){
+          color <- mapScoresToColor(.dat$score, color)$color
+        }else{
+          color <- unlist(lapply(.dat$color, function(.ele) .ele[1]))
+        }
+      }
+    }
+    grid.rect(x=(start(.dat) + end(.dat))/2,
+              y=0.5,
+              width = width(.dat),
+              height=0.9,
+              default.units = 'native',
+              gp=gpar(fill=color, col=color))
+  }
+}
 plotTrack <- function(name, track, curViewStyle, curYpos,
                       yscale, height, xlim, chr, strand,
                       operator, wavyLine, smooth=FALSE,
@@ -184,6 +205,31 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
         putYlab(curViewStyle, style, name, yHeightBottom, yHeightTop, height, yscale)
     }
     
+    if(any(style@tracktype=='annotation')&&track@type=='data'){
+      if(style@tracktype[1]=='annotation'){
+        pushViewport(viewport(x=curViewStyle@margin[2],
+                              y=1 - yHeightTop,
+                              width = 1-curViewStyle@margin[2]-curViewStyle@margin[4],
+                              height = yHeightTop,
+                              clip='on',
+                              just=c(0,0),
+                              xscale=xscale))
+        plotAnnotationTrack(track@dat, chr, strand, xlim, style@color)
+        popViewport()
+      }
+      if(style@tracktype[2]=='annotation'){
+        pushViewport(viewport(x=curViewStyle@margin[2],
+                              y=0,
+                              width = 1-curViewStyle@margin[2]-curViewStyle@margin[4],
+                              height = yHeightBottom,
+                              clip='on',
+                              just=c(0,0),
+                              xscale=xscale))
+        plotAnnotationTrack(track@dat2, chr, strand, xlim, style@color)
+        popViewport()
+      }
+    }
+    
     pushViewport(viewport(x=0, y=yHeightBottom, 
                           height=1 - yHeightTop - yHeightBottom,
                           width=1, 
@@ -202,14 +248,22 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
                                 yscale=yscale))
           ##grid.clip()
           ##for dat
-          xy1 <- plotDataTrack(track@dat, chr, strand, xlim, style@color[1], yscale=yscale, smooth=smooth)
+          xy1 <- list(x=numeric(length=0L), y=numeric(length=0L))
+          if(style@tracktype[1]!='annotation'){
+            xy1 <- plotDataTrack(track@dat, chr, strand, xlim, style@color[1], yscale=yscale, smooth=smooth)
+          }
           xy2 <- list(x=numeric(length=0L), y=numeric(length=0L))
           ##for dat2
           if(length(track@dat2)>0){
-            if(is_null_na(operator)[1]){
-              track@dat2$score <- -1 * track@dat2$score ##convert to negtive value
+            if(length(style@tracktype)<2){
+              style@tracktype[2] <- style@tracktype[1]
             }
-            xy2 <- plotDataTrack(track@dat2, chr, strand, xlim, style@color[2], yscale=yscale, smooth=smooth)
+            if(style@tracktype[2]!='annotation'){
+              if(is_null_na(operator)[1]){
+                track@dat2$score <- -1 * track@dat2$score ##convert to negative value
+              }
+              xy2 <- plotDataTrack(track@dat2, chr, strand, xlim, style@color[2], yscale=yscale, smooth=smooth)
+            }
           }
           xy <- list(x=c(xy1$x, xy2$x), y=c(xy1$y, xy2$y))
           xy.id <- order(xy$x)

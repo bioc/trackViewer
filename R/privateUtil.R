@@ -10,6 +10,24 @@ is_color <- function(x) {
              error = function(e) FALSE)
   }, FUN.VALUE = logical(1L))
 }
+mapScoresToColor <- function(scores, color, length.out=100){
+  rg <- range(as.numeric(as.matrix(scores)))
+  if(length(color)==0){
+    color <- colorRampPalette(c("green", "black", "red"))(length.out)
+  }else{
+    if(length(color)==1){
+      color <- if(color=="white") 
+        colorRampPalette(c("black", color))(length.out) else
+          colorRampPalette(c("white", color))(length.out)
+    }else{
+      color <- colorRampPalette(color)(length.out)
+    }
+  }
+  v <- seq(rg[1]-1, rg[2]+1, length.out = length.out+1)
+  color <- findInterval(scores, v, all.inside = TRUE)
+  return(list(color=color, breaks=v))
+}
+
 
 inRange <- function(x, scale){
   x>=scale[1] & x<=scale[2]
@@ -110,6 +128,7 @@ condenceGRs <- function(gr=GRanges(), FUN=sum){
 
 disjoinGRs <- function(gr=GRanges(), FUN=sum){
     if(length(gr)<1) return(gr)
+    if(length(gr$score)!=length(gr)) gr$score <- rep(1, length(gr))
     .gr <- disjoin(gr)
     ol <- findOverlaps(.gr, gr)
     s <- tapply(score(gr[subjectHits(ol)]), queryHits(ol), FUN=FUN)
@@ -216,14 +235,19 @@ getYlim <- function(tl, op){
         ylim <- .ele@style@ylim
         if(length(ylim)!=2){
             if(.ele@type %in% c("data", "lollipopData", "scSeq")){
-                if(length(.ele@dat)>0){
+                if(length(.ele@dat)>0 && .ele@style@tracktype[1]!='annotation'){
                     ylim <- unique(round(range(.ele@dat$score)))
                 }else{
                     ylim <- c(0, 0)
                 }
                 if(length(.ele@dat2)>0 && is_null_na(.op)[1]){
+                  if(length(.ele@style@tracktype)<2){
+                    .ele@style@tracktype[2] <- .ele@style@tracktype[1]
+                  }
+                  if(.ele@style@tracktype[2]!='annotation'){
                     ylim2 <- unique(round(range(.ele@dat2$score)))
                     ylim <- c(ylim, -1*ylim2)
+                  }
                 }
                 ylim <- range(c(0, ylim))
             }else{

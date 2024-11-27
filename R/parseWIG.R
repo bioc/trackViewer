@@ -74,10 +74,17 @@ parseWIG <- function(trackScore, chrom, from, to){
         if(length(res)<1) res <- GRanges(score=numeric(0))
         return(orderedGR(res))
     }
-    trackScore@dat <- parser(trackScore@dat, chrom, from, to)
-    gc(reset=TRUE)
-    trackScore@dat2 <- parser(trackScore@dat2, chrom, from, to)
-    gc(reset=TRUE)
+    if(trackScore@style@tracktype[1]!='annotation'){
+      trackScore@dat <- parser(trackScore@dat, chrom, from, to)
+      gc(reset=TRUE)
+    }
+    if(length(trackScore@style@tracktype)<2){
+      trackScore@style@tracktype[2] <- trackScore@style@tracktype[1]
+    }
+    if(trackScore@style@tracktype[2]!='annotation'){
+      trackScore@dat2 <- parser(trackScore@dat2, chrom, from, to)
+      gc(reset=TRUE)
+    }
     ## check the score
     ## if any score of dat smaller than 0, change it to dat2
     if(length(trackScore@dat2)<1 && any(trackScore@dat$score<0)){

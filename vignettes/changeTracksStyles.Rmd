@@ -200,7 +200,7 @@ names(trackList) <- c("cpsf160", "fox2", rep("HSPA8", 5))
 viewTracks(trackList, gr=gr, viewerStyle=viewerStyle)
 ```
 
-### Show paired data in the same track
+## Show paired data in the same track
 **trackViewer** can be used to show to-be-compared data in the same track side by side.
 
 ```{r viewTracksPaired,fig.cap='show two data in the same track',fig.width=8,fig.height=2.4}
@@ -211,6 +211,21 @@ strand(cpsf160$dat) <- strand(cpsf160$dat2) <- "-"
 setTrackStyleParam(cpsf160, "color", c("black", "red"))
 viewTracks(trackList(trs, cpsf160), gr=gr, viewerStyle=viewerStyle)
 ```
+## Show signals and the called peaks
+The called peaks can be plotted as annotation.
+
+```{r viewTracksAnnotation,fig.cap='show called peaks in track', fig.width=8, fig.height=2.4}
+cpsf160_cp <- cpsf160
+cpsf160$dat2 <- reduce(cpsf160$dat)
+cpsf160$dat2$score <- sample.int(length(cpsf160$dat2))
+setTrackStyleParam(cpsf160, "tracktype", c("peak", "annotation"))
+cpsf160_cp$dat <- reduce(cpsf160_cp$dat2)
+cpsf160_cp$dat$score <- sample.int(length(cpsf160_cp$dat))
+setTrackStyleParam(cpsf160_cp, "tracktype", c("annotation", "peak"))
+setTrackStyleParam(cpsf160_cp, "marginTop", 0.05)
+viewTracks(trackList(trs, cpsf160, cpsf160_cp), gr=gr, viewerStyle=viewerStyle)
+```
+
 
 ## Flip the x-axis
 The x-axis can be horizotally flipped for the genes in the negative strand.
