@@ -151,7 +151,8 @@ setTrackStyleParam(trackList[[2]], "marginTop", .2)
 viewTracks(trackList, gr=gr, viewerStyle=viewerStyle)
 ```
 
-For each transcript, the transcript name can be put on the upstream or downstream of the transcript.
+For each transcript, the transcript name can be put on the upstream or downstream of the transcript. 
+The Y-lab can also be removed by set 'ylabpos' to 'none' or set the name as ''.
 
 ```{r viewTracksYlabUpsDown,fig.cap='plot data with adjusted transcripts name position',fig.width=8,fig.height=3}
 trackListN <- trackList
@@ -160,6 +161,9 @@ setTrackStyleParam(trackListN[[4]], "ylabpos", "downstream")
 ## set cex to avoid automatic adjust
 setTrackStyleParam(trackListN[[3]], "ylabgp", list(cex=.6))
 setTrackStyleParam(trackListN[[4]], "ylabgp", list(cex=.6))
+## remove ylab
+setTrackStyleParam(trackListN[[5]], "ylabpos", "none")
+names(trackListN)[6] <- ""
 gr1 <- range(unname(unlist(GRangesList(sapply(trs, function(.ele) .ele$dat)))))
 start(gr1) <- start(gr1) - 2000
 end(gr1) <- end(gr1) + 2000

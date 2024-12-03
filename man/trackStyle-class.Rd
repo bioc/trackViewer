@@ -101,7 +101,7 @@ it should have two values.}
 
 \item{\code{ylabpos}}{\code{"character"}, ylable postion, ylabpos should 
 be 'left', 'right', 'topleft', 'bottomleft', 'topright', 'bottomright',
-'abovebaseline' or 'underbaseline'.
+'abovebaseline', 'underbaseline', or 'none'.
 For gene type track, it also could be 'upstream' or 'downstream'}
 
 \item{\code{ylablas}}{\code{"numeric"} y lable direction. It should 

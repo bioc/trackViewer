@@ -194,15 +194,19 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
                           width=1, 
                           just=c(0,0))) ## vp1
     ##put ylab
-    if(track@type %in% c("transcript", "gene") && style@ylabpos %in% c("upstream", "downstream")){
-        if(length(findOverlaps(ranges(range(unname(track@dat))), IRanges(xscale.orderd[1], xscale.orderd[2])))>0){
+    if(style@ylabpos!='none' && !is.na(name) && name!=""){
+      if(track@type %in% c("transcript", "gene") &&
+         style@ylabpos %in% c("upstream", "downstream")){
+        if(length(findOverlaps(ranges(range(unname(track@dat))),
+                               IRanges(xscale.orderd[1], xscale.orderd[2])))>0){
           putGeneYlab(curViewStyle, style, name, height, xscale,
                       range(unname(track@dat)), length(track@dat2)>0)
         }
-    }else{
+      }else{
         if(style@ylabpos=="upstream") style@ylabpos <- "left"
         if(style@ylabpos=="downstream") style@ylabpos <- "right"
         putYlab(curViewStyle, style, name, yHeightBottom, yHeightTop, height, yscale)
+      }
     }
     
     if(any(style@tracktype=='annotation')&&track@type=='data'){

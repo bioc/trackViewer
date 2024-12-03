@@ -174,7 +174,7 @@ setClass("yaxisStyle",
 #' @slot ylim \code{"numeric"} y-axis range
 #' @slot ylabpos \code{"character"}, ylable postion, ylabpos should 
 #' be 'left', 'right', 'topleft', 'bottomleft', 'topright', 'bottomright',
-#' 'abovebaseline' or 'underbaseline'.
+#' 'abovebaseline', 'underbaseline', or 'none'.
 #' For gene type track, it also could be 'upstream' or 'downstream'
 #' @slot ylablas \code{"numeric"} y lable direction. It should 
 #' be a integer 0-3. See \code{\link[graphics]{par}:las}
@@ -218,10 +218,10 @@ setClass("trackStyle",
          validity=function(object){
              if(!object@ylabpos %in% c("left", "right", "topleft", "bottomleft", 
                                        "topright", "bottomright", "upstream", "downstream",
-                                       "abovebaseline", "underbaseline"))
+                                       "abovebaseline", "underbaseline", "none"))
                  return("ylabpos should be 'left', 'right', 'topleft', 'bottomleft', 
                         'topright', 'bottomright', 'upstream', 'downstream', 
-                        'abovebaseline' or 'underbaseline'.")
+                        'abovebaseline', 'underbaseline' or 'none'.")
              if(!(object@ylablas %in% 0:3))
                 return("ylas should be numeric in {0,1,2,3}. See ?par")
              if(!all(object@tracktype %in% c("peak", "annotation", "heatmap", "link")))
