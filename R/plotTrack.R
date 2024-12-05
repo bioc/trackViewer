@@ -376,7 +376,7 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
         pushViewport(viewport(x=curViewStyle@margin[2], y=0, 
                               height=1, 
                               width=1-curViewStyle@margin[2]-curViewStyle@margin[4], 
-                              clip="off",
+                              clip="on",
                               just=c(0,0), 
                               xscale=xscale))
         plotGeneTrack(track, xlim, chr)
