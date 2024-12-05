@@ -14,6 +14,11 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
     y <- 0.5
   }
   
+  pos_vjust <- 1.2
+  neg_vjust <- -0.5
+  pos_hjust <- 0.2
+  neg_hjust <- 0.8
+  
   ## split transcripts by featureID, 
   ## get the ranges of each transcripts
   ## assign lines for all transcripts
@@ -59,7 +64,8 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
   }
   for(i in seq.int(totalLines)){
     vp <- viewport(y = currLineBottom - eachLineHeight/2, 
-                   height = eachLineHeight, xscale = xscale)
+                   height = eachLineHeight, xscale = xscale,
+                   clip = 'on')
     pushViewport(vp)
     if(doLabels){
       gene_y <- .75
@@ -160,9 +166,10 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
                                                           valueOnly = TRUE)), "snpc"), 
                             height = unit(gene_h/2, "snpc"),
                             just = c(ifelse(!str_neg, 0, 1), 1),
-                            default.units = "native"))
+                            default.units = "native",
+                            clip = 'off'))
       if(!hide_this_label){
-        if(!str_neg){
+        if(!str_neg){## positive strand
           if(plot_arrow){
             grid.lines(x=unit(c(0, 0, 1), "npc"),
                        y=unit(c(.5, 0, 0), "npc"),
@@ -171,16 +178,14 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
           }
           ## add gene name at TSS
           if(doLabels || must_have_label){
-            if(start(curr_rg) >= stringStopPos[1]){
-              grid.text(label = names(curr_rg), x = 0, y = 0, hjust = 0, vjust=1.5,
+            if(stringStopPos[1] <= stringStopPos[2]){##lower channel
+              grid.text(label = names(curr_rg), x = 0, y = 0, hjust = pos_hjust, vjust=pos_vjust,
                         gp = do.call(gpar, track@style@ylabgp))
               stringStopPos[1] <- start(curr_rg)+stringW
-            }else{
-              if(start(curr_rg) >= stringStopPos[2]){
-                grid.text(label = names(curr_rg), x = 0, y = 1, hjust = 0, vjust=-1,
-                          gp = do.call(gpar, track@style@ylabgp))
-                stringStopPos[2] <- start(curr_rg)+stringW
-              }
+            }else{##higher channel
+              grid.text(label = names(curr_rg), x = 0, y = 1, hjust = pos_hjust, vjust=neg_vjust,
+                        gp = do.call(gpar, track@style@ylabgp))
+              stringStopPos[2] <- start(curr_rg)+stringW
             }
           }else{#dynamic label
             if(i %in% c(1, totalLines)){
@@ -188,18 +193,18 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
                  end(curr_rg) >= stringStopPos[1] + stringW){
                 if(i==1){#top
                   grid.text(label = names(curr_rg), x = 0, y = 1,
-                            hjust = 0, vjust=-1.5,
+                            hjust = pos_hjust, vjust=neg_vjust,
                             gp = do.call(gpar, track@style@ylabgp))
                 }else{
                   grid.text(label = names(curr_rg), x = 0, y = 0,
-                            hjust = 0, vjust=1.5,
+                            hjust = pos_hjust, vjust=pos_vjust,
                             gp = do.call(gpar, track@style@ylabgp))
                 }
               }
               stringStopPos[1] <- end(curr_rg)
             }
           }
-        }else{
+        }else{## negative strand
           if(plot_arrow){
             grid.lines(x=unit(c(1, 1, 0), "npc"),
                        y=unit(c(.5, 0, 0), "npc"),
@@ -208,16 +213,14 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
           }
           ## add gene name at TSS
           if(doLabels || must_have_label){
-            if(end(curr_rg)-stringW >= stringStopPos[1]){
-              grid.text(label = names(curr_rg), x = 1, y = 0, hjust = 1, vjust=1.5,
+            if(stringStopPos[1]<=stringStopPos[2]){##lower channel
+              grid.text(label = names(curr_rg), x = 1, y = 0, hjust = neg_hjust, vjust=pos_vjust,
                         gp = do.call(gpar, track@style@ylabgp))
               stringStopPos[1] <- end(curr_rg)
-            }else{
-              if(end(curr_rg)-stringW >= stringStopPos[2]){
-                grid.text(label = names(curr_rg), x = 1, y = 1, hjust = 1, vjust=-1,
-                          gp = do.call(gpar, track@style@ylabgp))
-                stringStopPos[2] <- end(curr_rg)
-              }
+            }else{##higher channel
+              grid.text(label = names(curr_rg), x = 1, y = 1, hjust = neg_hjust, vjust=neg_vjust,
+                        gp = do.call(gpar, track@style@ylabgp))
+              stringStopPos[2] <- end(curr_rg)
             }
           }else{#dynamic label
             if(i %in% c(1, totalLines)){
@@ -225,11 +228,11 @@ plotGeneTrack <- function(track, xscale, chr, yaxis.gp=gpar(), lollipop_style_sw
                  end(curr_rg) >= stringStopPos[1] + stringW){
                 if(i==1){#bottom
                   grid.text(label = names(curr_rg), x = 1, y = 1,
-                            hjust = 1, vjust=-1.5,
+                            hjust = neg_hjust, vjust=neg_vjust,
                             gp = do.call(gpar, track@style@ylabgp))
                 }else{
                   grid.text(label = names(curr_rg), x = 1, y = 0,
-                            hjust = 1, vjust=1.5,
+                            hjust = neg_hjust, vjust=pos_vjust,
                             gp = do.call(gpar, track@style@ylabgp))
                 }
               }

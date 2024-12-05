@@ -1,3 +1,7 @@
+Changes in version 1.43.4
+
+    o Remove the clip for annotation track.
+    
 Changes in version 1.43.3
 
     o Add documentation to remove y label.

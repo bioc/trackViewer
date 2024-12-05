@@ -137,6 +137,22 @@ disjoinGRs <- function(gr=GRanges(), FUN=sum){
     .gr
 }
 
+subsetGeneTrack <- function(dat, chrom, from, to, st){
+  if(length(dat)){
+    if(length(dat$featureID)==length(dat)){
+      dat_rg <- split(dat, dat$featureID)
+      dat_rg <- GRangesList(dat_rg)
+      dat_rg <- range(dat_rg)
+      dat_rg <- unlist(dat_rg)
+      dat_rg <- subsetByOverlaps(
+        dat_rg,
+        GRanges(chrom, IRanges(from, to), strand = st))
+      dat <- subsetByOverlaps(dat, dat_rg)
+    }
+  }
+  return(dat)
+}
+
 filterTracks <- function(tl, chrom, from, to, st){
     for(i in seq_along(tl)){
         if(tl[[i]]@type %in% c("data", "scSeq")){
@@ -200,26 +216,36 @@ filterTracks <- function(tl, chrom, from, to, st){
             }
             tl[[i]]@dat2 <- tl[[i]]@dat2[keep2]
           }else{
-            if(tl[[i]]@type=="lollipopData"){
-              dat <- tl[[i]]@dat
+            if(tl[[i]]@type %in% c("transcript", "gene")){
+              tl[[i]]@dat <- subsetGeneTrack(tl[[i]]@dat,
+                                             chrom, from, to, st)
+              tl[[i]]@dat2 <- subsetGeneTrack(tl[[i]]@dat2,
+                                              chrom, from, to, st)
             }else{
-              dat <- range(unname(tl[[i]]@dat))
+              if(tl[[i]]@type=="lollipopData"){
+                dat <- tl[[i]]@dat
+              }else{
+                dat <- restrict(tl[[i]]@dat, start = from, end=to)
+              }
+              dat <- dat[end(dat)>=from &
+                           start(dat)<=to &
+                           seqnames(dat)==chrom]
+              dat2 <- tl[[i]]@dat2
+              if(length(dat2)>0){
+                dat2 <- dat2[end(dat2)>=from &
+                               start(dat2)<=to &
+                               seqnames(dat2)==chrom]
+              }
+              if(tl[[i]]@type=="lollipopData"){
+                tl[[i]]@dat <- dat
+                tl[[i]]@dat2 <- dat2
+              }else{
+                tl[[i]]@dat <- dat
+                tl[[i]]@dat2 <- dat2
+              }
+              if(length(dat)==0 && length(dat2)==0)
+                tl[[i]]@style@height <- 0
             }
-            dat <- dat[end(dat)>=from &
-                         start(dat)<=to &
-                         seqnames(dat)==chrom]
-            dat2 <- tl[[i]]@dat2
-            if(length(dat2)>0){
-              dat2 <- dat2[end(dat2)>=from &
-                             start(dat2)<=to &
-                             seqnames(dat2)==chrom]
-            }
-            if(tl[[i]]@type=="lollipopData"){
-              tl[[i]]@dat <- dat
-              tl[[i]]@dat2 <- dat2
-            }
-            if(length(dat)==0 && length(dat2)==0)
-              tl[[i]]@style@height <- 0
           }
         }
     }
