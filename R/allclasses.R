@@ -158,7 +158,8 @@ setClass("yaxisStyle",
 #' @description An object of class \code{"trackStyle"} represents track style.
 #' @rdname trackStyle-class
 #' @aliases trackStyle
-#' @slot tracktype \code{"character"} track type, could be peak or annotation. 
+#' @slot tracktype \code{"character"} track type, could be peak, 
+#' line, histogram, or annotation. 
 #' Default is "peak". "annotation" is used to mark the peak regions.
 #' For interaction data,
 #' it could be "heatmap" or "link".
@@ -224,8 +225,9 @@ setClass("trackStyle",
                         'abovebaseline', 'underbaseline' or 'none'.")
              if(!(object@ylablas %in% 0:3))
                 return("ylas should be numeric in {0,1,2,3}. See ?par")
-             if(!all(object@tracktype %in% c("peak", "annotation", "heatmap", "link")))
-                 return("tracktype must be on of peak, annotation, heatmap or link")
+             if(!all(object@tracktype %in% c("peak", "annotation", "line", "histogram",
+                                             "heatmap", "link")))
+                 return("tracktype must be on of peak, annotation, line, histogram, heatmap or link")
              return(TRUE)
          }
 )

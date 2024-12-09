@@ -68,11 +68,12 @@ resampleData <- function(.dat, scale, step=1000){
   .dat <- orderedGR(.dat1)
   .dat
 }
-plotDataTrack <- function(.dat, chr, strand, scale, color, yscale, smooth=FALSE){
+plotDataTrack <- function(.dat, chr, strand, scale, color, yscale, smooth=FALSE, type='peak'){
     names(.dat) <- NULL
     mcols(.dat) <- mcols(.dat)[, "score"]
     colnames(mcols(.dat)) <- "score"
     if(missing(yscale)) yscale <- c(0, 1)
+    yscale <- range(yscale)
     if(length(.dat)>0){##subset if length .dat > 1000
         trackViewerCache <- list(step=1000)
         if(length(.dat)>trackViewerCache$step){## resample the points
@@ -116,18 +117,51 @@ plotDataTrack <- function(.dat, chr, strand, scale, color, yscale, smooth=FALSE)
               y <- as.numeric(rep(.dat[,"score"], each=2))
               x2 <- c(start(.data_range), min(x)-.5, x, max(x)+.5, end(.data_range))
               y2 <- c(0, 0, y, 0, 0)
-              grid.polygon(x2, y2, default.units="native", 
-                           gp=gpar(col=NA, fill=color))
-              yscale <- range(yscale)
-              if(yscale[1]<=0 && yscale[2]>=0){
+              if(type=='line'){
+                grid.lines(x2, y2, default.units="native", 
+                             gp=gpar(col=color))
+              }else{
+                if(type=='histogram'){
+                  yir <- IRanges(scale[1], scale[2])
+                  tiles <- tile(yir, n = min(width(yir), 100))[[1]]
+                  cvg <- coverage(ranges(.data[[i]]), weight = .data[[i]]$score)
+                  cvg_views <- Views(cvg, start(tiles), end(tiles))
+                  y3 <- viewMeans(cvg_views, na.rm = TRUE)
+                  x3 <- start(tiles) + width(tiles)/2
+                  grid.rect(x3, y3/2, default.units="native", 
+                            width = width(tiles), height = y3,
+                            gp=gpar(col=NA, fill=color))
+                }else{
+                  grid.polygon(x2, y2, default.units="native", 
+                               gp=gpar(col=NA, fill=color))
+                }
+              }
+              
+              if(yscale[1]<=0 && yscale[2]>=0){ ## yscale[2] >= 0 >= yscale[1]
+                ## plot baseline
                 grid.lines(x=scale, y=0, default.units="native",
                            gp=gpar(col=color))
-              }else{
+              }else{ ## both yscale>0 or <0
                 dy <- abs(yscale - 0)
                 dy <- yscale[order(dy)][1]
                 grid.lines(x=scale, y=dy, default.units="native",
                            gp=gpar(col="red"))
               }
+              if(any(y2>max(yscale, na.rm = TRUE) | y2<min(yscale, na.rm = TRUE))){
+                ## out of range
+                M <- max(yscale, na.rm = TRUE)
+                m <- min(yscale, na.rm = TRUE)
+                keep <- which(y2>M | y2<m)
+                k0 <- keep-1
+                k1 <- keep+1
+                k0[k0<1] <- 1
+                k1[k1>length(y2)] <- length(y2)
+                grid.segments(x0=x2[k0], y0=ifelse(y2[keep]>M, M, m),
+                              x1=x2[k1], y1=ifelse(y2[keep]>M, M, m),
+                              default.units = 'native',
+                              gp=gpar(col='red'))
+              }
+              
               xt <- c(xt, x)
               yt <- c(yt, y)
               ## do smooth curve
@@ -254,7 +288,7 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
           ##for dat
           xy1 <- list(x=numeric(length=0L), y=numeric(length=0L))
           if(style@tracktype[1]!='annotation'){
-            xy1 <- plotDataTrack(track@dat, chr, strand, xlim, style@color[1], yscale=yscale, smooth=smooth)
+            xy1 <- plotDataTrack(track@dat, chr, strand, xlim, style@color[1], yscale=yscale, smooth=smooth, type = style@tracktype[1])
           }
           xy2 <- list(x=numeric(length=0L), y=numeric(length=0L))
           ##for dat2
@@ -266,7 +300,7 @@ plotTrack <- function(name, track, curViewStyle, curYpos,
               if(is_null_na(operator)[1]){
                 track@dat2$score <- -1 * track@dat2$score ##convert to negative value
               }
-              xy2 <- plotDataTrack(track@dat2, chr, strand, xlim, style@color[2], yscale=yscale, smooth=smooth)
+              xy2 <- plotDataTrack(track@dat2, chr, strand, xlim, style@color[2], yscale=yscale, smooth=smooth, type = style@tracktype[2])
             }
           }
           xy <- list(x=c(xy1$x, xy2$x), y=c(xy1$y, xy2$y))
