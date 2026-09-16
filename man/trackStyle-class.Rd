@@ -14,6 +14,8 @@
 \alias{$,trackStyle-method}
 \alias{$<-,track-method}
 \alias{$<-,trackStyle-method}
+\alias{.DollarNames.track}
+\alias{.DollarNames.trackStyle}
 \alias{setTrackStyleParam}
 \alias{setTrackStyleParam,track,character-method}
 \alias{setTrackStyleParam,track,character,ANY-method}
@@ -37,6 +39,10 @@
 
 \S4method{$}{track}(x, name) <- value
 
+\method{.DollarNames}{track}(x, pattern = "")
+
+\method{.DollarNames}{trackStyle}(x, pattern = "")
+
 setTrackStyleParam(ts, attr, value)
 
 \S4method{setTrackStyleParam}{track,character}(ts, attr, value)
@@ -58,19 +64,171 @@ setTrackYaxisParam(ts, attr, value)
 
 \item{name}{slot name of trackStyle or track}
 
+\item{pattern}{A regular expression. Only matching names are returned.}
+
 \item{ts}{An object of \code{track}.}
 
 \item{attr}{the name of slot of \code{\link{trackStyle}} object to be changed.}
 }
+\value{
+An object of class \code{\link{track}} with the modified style,
+returned invisibly. The variable supplied as \code{ts} is updated as a side
+effect.
+
+An object of class \code{\link{track}} with the modified
+\code{xscale}, returned invisibly. The variable supplied as \code{ts} is
+updated as a side effect.
+
+An object of class \code{\link{track}} with the modified
+\code{yaxis}, returned invisibly. The variable supplied as \code{ts} is
+updated as a side effect.
+}
 \description{
 An object of class \code{"trackStyle"} represents track style.
 
-An object of class \code{"track"} represents scores of a given track.
+An object of class \code{"track"} bundles the genomic data to be
+plotted together with the style used to draw it. A \code{track} is the basic
+unit accepted by \code{\link{viewTracks}}; several of them are collected into
+a \code{\link{trackList}} for a multi-panel figure.
 }
 \details{
-The attr of \code{setTrackXscaleParam} could not only be a slot of xscale, but also be position.
-If the attr is set to position, value must be a list of x, y and label. For example
-setTrackXscaleParam(track, attr="position", value=list(x=122929675, y=4, label=500))
+The validity method enforces the type-specific requirements summarised above;
+the most common errors are a missing \code{score} or \code{feature} metadata
+column, a lollipop range wider than one base, and a \code{dat2} whose length
+does not match \code{dat} for interaction data.
+
+Note that \code{dat} and \code{dat2} are plain \code{GRanges} objects, so the
+seqlevel style of the track must match that of the other tracks and of the
+plotting range. \code{seqlevelsStyle} and its replacement method are
+defined for \code{track} and rename both \code{dat} and \code{dat2} at once.
+
+\code{setTrackStyleParam} changes one styling slot of the
+\code{\link{trackStyle}} object held in \code{ts@style}. It accepts only the
+slots that are plain values; the two compound slots have their own setters,
+\code{\link{setTrackXscaleParam}} for \code{xscale} and
+\code{\link{setTrackYaxisParam}} for \code{yaxis}. Passing any other name,
+including \code{"xscale"} or \code{"yaxis"}, raises an error.
+
+Accepted values of \code{attr}:
+\describe{
+  \item{\code{tracktype}}{\code{"character"}. How the data is drawn. For
+  \code{"data"} tracks use \code{"peak"} (the default), \code{"line"},
+  \code{"histogram"} or \code{"annotation"}, the last marking peak regions
+  rather than plotting their scores. For \code{"interactionData"} tracks use
+  \code{"heatmap"} or \code{"link"}.}
+  \item{\code{color}}{\code{"character"} vector of colors. Give two values
+  when the track has both \code{dat} and \code{dat2}, the first for the
+  positive side and the second for the negative side of the baseline.}
+  \item{\code{height}}{\code{"numeric"} between 0 and 1, the fraction of the
+  figure given to this track. Note that \code{\link{trackList}} rewrites this
+  slot for every element it is given, so set it after building the list, not
+  before.}
+  \item{\code{marginTop}, \code{marginBottom}}{\code{"numeric"}, space left
+  above and below the drawing region of the track, as a fraction of its
+  height. Defaults are 0 and 0.05.}
+  \item{\code{ylim}}{\code{"numeric"} of length 2 fixing the y-axis range.
+  Useful for making two tracks directly comparable, since the range is
+  otherwise taken from the data in the current view.}
+  \item{\code{ylabpos}}{\code{"character"}, one of \code{"left"},
+  \code{"right"}, \code{"topleft"}, \code{"bottomleft"}, \code{"topright"},
+  \code{"bottomright"}, \code{"abovebaseline"}, \code{"underbaseline"} or
+  \code{"none"}; for gene-type tracks also \code{"upstream"} or
+  \code{"downstream"}.}
+  \item{\code{ylablas}}{\code{"numeric"} in \{0, 1, 2, 3\}, the rotation of
+  the y label. See \code{\link[graphics]{par}:las}.}
+  \item{\code{ylabgp}}{\code{"list"} of graphical parameters for the y label,
+  converted to \code{\link[grid]{gpar}}, e.g. \code{list(cex=.8, col="gray30")}.}
+  \item{\code{breaks}}{\code{"numeric"} breaks for the color key of
+  interaction data.}
+  \item{\code{NAcolor}}{\code{"character"}, the color used for missing cells
+  of an interaction heatmap. Default \code{"white"}.}
+  \item{\code{ysplit}}{\code{"numeric"}, where to split the y region for
+  back-to-back interaction plots. Default 0.5 splits it evenly; it has no
+  effect on other layouts.}
+}
+
+The value is assigned with \code{check = TRUE}, so the validity method of
+\code{\link{trackStyle}} runs on every call and an out-of-range value (an
+unknown \code{tracktype}, an \code{ylablas} outside 0:3, an unrecognized
+\code{ylabpos}) fails immediately rather than at plotting time.
+
+\code{setTrackXscaleParam} changes the x-scale bar of a track, stored as an
+\code{\link{xscale}} object at \code{ts@style@xscale}. The x-scale bar is a
+short horizontal ruler drawn inside the track's own panel, independent of
+the shared genomic x-axis of the whole figure, typically used to show a
+distance such as "1K" next to a zoomed-in feature.
+
+\code{attr} can be any slot of \code{\link{xscale}}, or the convenience
+name \code{"position"}:
+\describe{
+  \item{\code{from}, \code{to}}{Objects of class \code{\link{pos}}, the two
+  endpoints of the scale bar. Because these are \code{pos} objects rather
+  than bare numbers, setting them directly means constructing the object
+  yourself, e.g. \code{new("pos", x=12345678, y=0.5, unit="native")} for a
+  point given in native (genomic) coordinates, or a fraction with
+  \code{unit="npc"} for a position relative to the panel. Most callers will
+  find \code{attr="position"} (below) more convenient than setting
+  \code{from} and \code{to} separately, since it keeps them centered and in
+  sync with the label.}
+  \item{\code{label}}{\code{"character"}, the text drawn on the scale bar,
+  e.g. \code{"500 bp"}. Set directly this is used verbatim.}
+  \item{\code{gp}}{\code{"list"} of graphical parameters for the scale bar
+  and its label, converted to \code{\link[grid]{gpar}}, e.g.
+  \code{list(cex=.5, col="black", lwd=2)}.}
+  \item{\code{draw}}{\code{"logical"}, whether the scale bar is drawn at
+  all. Default \code{FALSE}; set to \code{TRUE} even \code{from}/\code{to}
+  (or \code{position}) have been set, the scale bar will show.}
+  \item{\code{position}}{A shortcut that sets \code{from}, \code{to} and
+  \code{label} together from a single scale length, instead of requiring two
+  \code{pos} objects. \code{value} must be a \code{"list"} with named
+  elements \code{x}, \code{y} and \code{label}:
+    \itemize{
+      \item \code{x}, \code{y} — the native-coordinate of the bar
+      (genomic position and track-relative y, respectively). The bar is
+      drawn symmetrically about this point.
+      \item \code{label} — the width the bar should represent.
+    }
+  A \code{label} that cannot be coerced to numeric (\code{NA} after
+  \code{as.numeric}) is rejected before any slot is touched.}
+}
+
+As with the other slots of \code{\link{xscale}}, updated values are assigned
+with \code{check = TRUE}, so the \code{\link{pos}} validity method (checking
+the \code{unit} string) still applies when \code{from}/\code{to} are set
+through \code{"position"}.
+
+\code{setTrackYaxisParam} changes the y-axis of a track, stored as a
+\code{\link{yaxisStyle}} object at \code{ts@style@yaxis}. This is the axis
+drawn alongside the track's own data panel (score, coverage, etc.), separate
+from the shared genomic x-axis of the whole figure.
+
+Accepted values of \code{attr}, all slots of \code{\link{yaxisStyle}}:
+\describe{
+  \item{\code{at}}{\code{"numeric"} vector of y-values at which tick marks
+  are drawn, e.g. \code{c(0, 25, 50)}. If left at its default
+  (\code{numeric(0)}), tick positions are chosen automatically from the
+  plotted range.}
+  \item{\code{label}}{\code{"logical"}, whether the numeric value of each
+  tick in \code{at} is printed next to it. Default \code{FALSE}, i.e. ticks
+  are drawn without their values; set to \code{TRUE} to show them.}
+  \item{\code{gp}}{\code{"list"} of graphical parameters for the axis line,
+  ticks and labels, converted to \code{\link[grid]{gpar}}, e.g.
+  \code{list(cex=.6, col="blue", lwd=1.5)}.}
+  \item{\code{draw}}{\code{"logical"}, whether the y-axis is drawn at all.
+  Default \code{TRUE}.}
+  \item{\code{main}}{\code{"logical"}, which side of the panel the axis is
+  drawn on: \code{TRUE} (the default) draws it on the left of the track,
+  \code{FALSE} on the right. Useful for telling apart the axes of two
+  adjacent or back-to-back tracks at a glance.}
+}
+
+Any other value of \code{attr}, including \code{"xscale"} or a slot name
+belonging to \code{\link{trackStyle}} itself (like \code{"color"} or
+\code{"height"}), is rejected, use \code{\link{setTrackStyleParam}} for the
+plain style slots and \code{\link{setTrackXscaleParam}} for the x-scale bar.
+Values are assigned with \code{check = TRUE}, so an ill-typed value (for
+example a non-logical passed to \code{"draw"}) fails immediately rather than
+at plotting time.
 }
 \section{Slots}{
 
@@ -116,23 +274,96 @@ parameter settings of y-label.}
 Default is 0.5, which will split the region half to half. It will only work
 for back to back plot.}
 
-\item{\code{dat}}{Object of class \code{\link[GenomicRanges:GRanges-class]{GRanges}}
-the scores of a given track. It should contain score metadata.}
+\item{\code{dat}}{Object of class \code{\link[GenomicRanges:GRanges-class]{GRanges}},
+the primary data of the track. The metadata columns it must carry depend on
+\code{type} (see \sQuote{Details}): coverage-like tracks
+(\code{"data"}, \code{"scSeq"}), \code{"lollipopData"} and
+\code{"interactionData"} require a \code{score} column, whereas
+\code{"gene"} and \code{"transcript"} tracks require a \code{feature} column.}
 
-\item{\code{dat2}}{Object of class \code{\link[GenomicRanges:GRanges-class]{GRanges}}
-the scores of a given track. It should contain score metadata. When dat2
-and dat is paired, dat will be drawn as positive value where dat2 will be 
-drawn as negative value (-1 * score)}
+\item{\code{dat2}}{Object of class \code{\link[GenomicRanges:GRanges-class]{GRanges}},
+the optional second data set of the track; leave it as a zero-length
+\code{GRanges} when unused. Its meaning depends on \code{type}:
+\itemize{
+  \item for \code{"data"}, \code{"scSeq"} and \code{"lollipopData"} tracks it
+  is drawn back-to-back with \code{dat}: \code{dat} above the baseline and
+  \code{dat2} below it as \code{-1 * score}, which is the usual way to
+  compare two samples or the two strands of one sample in a single panel;
+  \item for \code{"interactionData"} it holds the second anchor of each
+  interaction, so it must either be the same length as \code{dat} (anchors
+  matched element-wise) or carry a \code{target} metadata column.
+}
+When supplied it must contain a \code{score} column, and for lollipop data
+every range must have width 1, exactly as for \code{dat}.}
 
-\item{\code{type}}{The type of track. It could be 'data', 'gene', 'transcript', 'scSeq', 'lollipopData' or 'interactionData'.}
+\item{\code{type}}{The type of track, one of:
+\describe{
+  \item{\code{"data"}}{continuous or interval scores — coverage, signal,
+  peaks. Drawn as a peak, line or histogram depending on
+  \code{style@tracktype}.}
+  \item{\code{"gene"}}{gene models. \code{dat} must have a \code{feature}
+  column describing each range (for example \code{"exon"}, \code{"CDS"},
+  \code{"utr5"}, \code{"utr3"}).}
+  \item{\code{"transcript"}}{transcript models; same \code{feature}
+  requirement as \code{"gene"}, but isoforms are drawn on separate rows.}
+  \item{\code{"scSeq"}}{single-cell signal. Validated like \code{"data"},
+  i.e. a \code{format} and a numeric \code{score} are required.}
+  \item{\code{"lollipopData"}}{point features such as variants or
+  modification sites. Every range in \code{dat} (and \code{dat2}) must have
+  width 1; ranges wider than one base are rejected.}
+  \item{\code{"interactionData"}}{chromatin interactions, for example from
+  Hi-C or 4C. Drawn as a heatmap or as arcs according to
+  \code{style@tracktype}.}
+}}
 
-\item{\code{format}}{The format of the input. It could be "BED", "bedGraph",
-"WIG", "BigWig" or "BAM"}
+\item{\code{format}}{The format the data was imported from: \code{"BED"},
+\code{"bedGraph"}, \code{"WIG"}, \code{"BigWig"} or \code{"BAM"}. It is
+required, and must be a single string, for \code{"data"} and \code{"scSeq"}
+tracks; other types ignore it. For every format except \code{"WIG"} the
+\code{score} column must be \code{numeric} or \code{integer}. \code{"WIG"} is
+the exception: because a WIG file has no fixed step boundaries until it is
+plotted, \code{score} is stored as a
+\code{\link[IRanges:AtomicList-class]{CompressedCharacterList}} and is
+converted on the fly — see \code{\link{importScore}}.}
 
-\item{\code{style}}{Object of class \code{\link{trackStyle}}}
+\item{\code{style}}{Object of class \code{\link{trackStyle}} controlling color,
+height, margins, y-axis, x-scale and the drawing mode. Do not assign to its
+slots directly; use \code{\link{setTrackStyleParam}},
+\code{\link{setTrackXscaleParam}} and \code{\link{setTrackYaxisParam}}, which
+validate the value and update the object in the calling frame.}
 
 \item{\code{name}}{unused yet}
 }}
+
+\section{Assignment in the calling frame}{
+
+Unlike most R functions, \code{setTrackStyleParam} modifies its first
+argument in place: it assigns the updated track back to the variable that was
+passed in, so \code{setTrackStyleParam(fox2, "color", "red")} is enough and
+\code{fox2 <- setTrackStyleParam(...)} is not needed. This works only when
+\code{ts} is given as a name or a subsettable expression that can be assigned
+to; calling it on a temporary value, for example
+\code{setTrackStyleParam(importScore(f), "color", "red")}, updates nothing
+the caller can see. Inside \code{lapply} and friends the assignment targets
+the loop variable, which is discarded, so use the returned object there
+instead — it is returned invisibly and carries the same change.
+
+
+Like \code{\link{setTrackStyleParam}}, this method assigns the updated track
+back to the variable passed as \code{ts} in the caller's environment, so
+\code{setTrackXscaleParam(fox2, "draw", TRUE)} is sufficient and the result
+need not be re-assigned. It is also returned invisibly for use in contexts
+(such as \code{lapply}) where the calling-frame assignment has no visible
+target.
+
+
+Like \code{\link{setTrackStyleParam}} and \code{\link{setTrackXscaleParam}},
+this method assigns the updated track back to the variable passed as
+\code{ts} in the caller's environment, so
+\code{setTrackYaxisParam(fox2, "draw", FALSE)} is sufficient on its own. It
+is also returned invisibly for use in contexts, such as \code{lapply}, where
+that calling-frame assignment has no visible target.
+}
 
 \examples{
 extdata <- system.file("extdata", package="trackViewer",
@@ -142,8 +373,87 @@ setTrackStyleParam(fox2, "color", c("red","green"))
 setTrackXscaleParam(fox2, "gp", list(cex=.5))
 setTrackYaxisParam(fox2, "gp", list(col="blue"))
 fox2$dat <- GRanges(score=numeric(0))
+
+## inspect and change the style
+fox2$type
+fox2$style$tracktype
+setTrackStyleParam(fox2, "tracktype", "histogram")
+setTrackStyleParam(fox2, "height", .2)
+
+extdata <- system.file("extdata", package="trackViewer", mustWork=TRUE)
+fox2 <- importScore(file.path(extdata, "fox2.bed"), format="BED")
+
+## the track is updated in place; no re-assignment needed
+setTrackStyleParam(fox2, "tracktype", "histogram")
+setTrackStyleParam(fox2, "color", c("#E69F00", "#56B4E9"))
+setTrackStyleParam(fox2, "ylim", c(0, 50))
+setTrackStyleParam(fox2, "ylabpos", "topleft")
+setTrackStyleParam(fox2, "ylabgp", list(cex=.8, col="gray30"))
+fox2$style$tracktype
+
+## inside lapply, use the returned value
+trs <- lapply(list(a=fox2, b=fox2), function(.ele){
+    setTrackStyleParam(.ele, "height", .25)
+})
+
+## invalid values are rejected straight away
+\dontrun{
+setTrackStyleParam(fox2, "ylablas", 5)      # must be 0:3
+setTrackStyleParam(fox2, "xscale", list())  # use setTrackXscaleParam
+}
+extdata <- system.file("extdata", package="trackViewer", mustWork=TRUE)
+fox2 <- importScore(file.path(extdata, "fox2.bed"), format="BED")
+
+## simplest way: give a centre point and a width in bases
+setTrackXscaleParam(fox2, "position",
+                     list(x=122929675, y=4, label=500))
+setTrackXscaleParam(fox2, "draw", TRUE)
+
+## style the bar itself
+setTrackXscaleParam(fox2, "gp", list(cex=.5, col="gray30"))
+
+## equivalent, done by hand with explicit pos objects
+setTrackXscaleParam(fox2, "from",
+                     new("pos", x=122929675-500, y=4, unit="native"))
+setTrackXscaleParam(fox2, "to",
+                     new("pos", x=122929675+500, y=4, unit="native"))
+setTrackXscaleParam(fox2, "label", "1K")
+
+\dontrun{
+## rejected: label can't be parsed as a number
+setTrackXscaleParam(fox2, "position",
+                     list(x=122929675, y=4, label="five hundred"))
+}
+extdata <- system.file("extdata", package="trackViewer", mustWork=TRUE)
+fox2 <- importScore(file.path(extdata, "fox2.bed"), format="BED")
+
+## show tick values at chosen positions
+setTrackYaxisParam(fox2, "at", c(0, 25, 50))
+setTrackYaxisParam(fox2, "label", TRUE)
+
+## style the axis and move it to the right-hand side
+setTrackYaxisParam(fox2, "gp", list(cex=.6, col="blue"))
+setTrackYaxisParam(fox2, "main", FALSE)
+
+## hide the axis entirely
+setTrackYaxisParam(fox2, "draw", FALSE)
+
+\dontrun{
+## rejected: "color" belongs to trackStyle, not yaxisStyle
+setTrackYaxisParam(fox2, "color", "red")
+}
 }
 \seealso{
 Please try to use \code{\link{importScore}} and \code{\link{importBam}} to 
 generate the object.
+
+\code{\link{setTrackXscaleParam}}, \code{\link{setTrackYaxisParam}},
+\code{\link{trackStyle}}
+
+\code{\link{xscale}}, \code{\link{pos}},
+\code{\link{setTrackStyleParam}},
+\code{\link{setTrackYaxisParam}}
+
+\code{\link{yaxisStyle}}, \code{\link{setTrackStyleParam}},
+\code{\link{setTrackXscaleParam}}
 }

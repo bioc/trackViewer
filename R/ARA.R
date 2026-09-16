@@ -12,7 +12,7 @@
 #' @return A \link[InteractionSet:GInteractions-class]{GInteractions} object
 #' with scores which represent the mean values of the interactions.
 #' @export
-#' @importFrom InteractionSet regions `regions<-`
+#' @importFrom InteractionSet regions "regions<-"
 #' @examples
 #' hic <- system.file("extdata", "test_chr22.hic", package = "trackViewer",
 #'                    mustWork=TRUE)

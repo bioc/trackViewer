@@ -24,9 +24,60 @@ setTrackViewerStyleParam(tvs, attr, value)
 
 \item{value}{values to be assigned.}
 }
+\value{
+An object of class \code{\link{trackViewerStyle}} with the modified
+slot, returned invisibly. The variable supplied as \code{tvs} is updated as
+a side effect.
+}
 \description{
 An object of class \code{"trackViewerStyle"} 
              represents track viewer style.
+}
+\details{
+\code{setTrackViewerStyleParam} changes one slot of a
+\code{\link{trackViewerStyle}} object. Unlike \code{setTrackStyleParam} and
+its siblings, this style is not attached to a single track: it controls the
+figure-wide x-axis shared by every track in a plot (drawn once, beneath the
+bottom-most track), so this function is typically called on the
+\code{trackViewerStyle} object passed to \code{viewTracks}, not on a track
+itself.
+
+Accepted values of \code{attr}, all slots of \code{\link{trackViewerStyle}}:
+\describe{
+  \item{\code{margin}}{\code{"numeric"} of length 4, the bottom, left, top
+  and right margins of the whole plot, as fractions of the device (each
+  value must be between 0 and 0.8). Default \code{c(.01, .05, 0, 0)}.}
+  \item{\code{xlas}}{\code{"numeric"} in \{0, 1, 2, 3\}, the rotation of the
+  x-axis tick labels. See \code{\link[graphics]{par}:las}. Ignored when
+  \code{autolas} is \code{TRUE}.}
+  \item{\code{xgp}}{\code{"list"} of graphical parameters for the x-axis,
+  converted to \code{\link[grid]{gpar}}, e.g. \code{list(cex=.8, col="black")}.
+  For the equivalent y-axis settings, see \code{\link{yaxisStyle}} and
+  \code{\link{setTrackYaxisParam}}, which are per-track rather than
+  figure-wide.}
+  \item{\code{xaxis}}{\code{"logical"}, whether the shared x-axis is drawn at
+  all. Default \code{FALSE}.}
+  \item{\code{xat}}{\code{"numeric"} vector of genomic positions at which
+  x-axis tick marks are drawn, passed to \code{grid.xaxis} as \code{at}. If
+  left at its default (\code{numeric(0)}), positions are chosen
+  automatically from the plotted range.}
+  \item{\code{xlabel}}{\code{"character"} vector of labels for the ticks in
+  \code{xat}, passed to \code{grid.xaxis} as \code{label}. Should be the
+  same length as \code{xat} when both are set explicitly; left at its
+  default, labels are generated automatically from the tick positions.}
+  \item{\code{autolas}}{\code{"logical"}, whether the y-axis label direction
+  is chosen automatically rather than following \code{xlas}. Default
+  \code{FALSE}.}
+  \item{\code{flip}}{\code{"logical"}, whether the x-axis (and the whole
+  plot) is flipped, e.g. to display a feature on the minus strand
+  5' to 3' left to right. Default \code{FALSE}.}
+}
+
+Any other value of \code{attr} is rejected. Values are assigned with
+\code{check = TRUE}, so the validity method of
+\code{\link{trackViewerStyle}} runs on every call — an \code{xlas} outside
+0:3 or a \code{margin} outside [0, 0.8] fails immediately with a descriptive
+message rather than surfacing later as a plotting error.
 }
 \section{Slots}{
 
@@ -53,8 +104,45 @@ parameter settings of x-axis. For y-axis, see \code{\link{yaxisStyle}}}
 \item{\code{flip}}{\code{"logical"} flip the x-axis or not, default FALSE}
 }}
 
+\section{Assignment in the calling frame}{
+
+Like \code{\link{setTrackStyleParam}}, this method assigns the updated
+object back to the variable passed as \code{tvs} in the caller's
+environment, so \code{setTrackViewerStyleParam(tvs, "xaxis", TRUE)} is
+sufficient on its own and the result need not be re-assigned. It is also
+returned invisibly for use in contexts, such as \code{lapply}, where that
+calling-frame assignment has no visible target — see
+\code{\link{setTrackStyleParam}} for a worked example of that case.
+}
+
 \examples{
 tvs <- trackViewerStyle()
 setTrackViewerStyleParam(tvs, "xaxis", TRUE)
 
+tvs <- trackViewerStyle()
+
+## turn on the shared x-axis and rotate its labels
+setTrackViewerStyleParam(tvs, "xaxis", TRUE)
+setTrackViewerStyleParam(tvs, "xlas", 2)
+
+## choose explicit tick positions and labels
+setTrackViewerStyleParam(tvs, "xat", c(122929000, 122929500, 122930000))
+setTrackViewerStyleParam(tvs, "xlabel", c("122,929,000", "122,929,500", "122,930,000"))
+
+## tighten the plot margins
+setTrackViewerStyleParam(tvs, "margin", c(.02, .08, .01, .01))
+
+## flip the plot, e.g. for a minus-strand gene
+setTrackViewerStyleParam(tvs, "flip", TRUE)
+
+\dontrun{
+## rejected: xlas must be one of 0:3
+setTrackViewerStyleParam(tvs, "xlas", 5)
+## rejected: not a slot of trackViewerStyle
+setTrackViewerStyleParam(tvs, "color", "red")
+}
+}
+\seealso{
+\code{\link{trackViewerStyle}}, \code{\link{setTrackStyleParam}},
+\code{\link{setTrackXscaleParam}}, \code{\link{setTrackYaxisParam}}
 }
