@@ -69,11 +69,11 @@ dandelion.plot(methy, features, ranges=gr, type="pie", legend=legends)
 ```
 
 ## Change the number of dandelions
-```{r fig.width=4.5,fig.height=4}
+```{r fig.width=4.5,fig.height=4, eval=FALSE}
 ## Less dandelions
 dandelion.plot(methy, features, ranges=gr, type="circle", maxgaps=1/10)
 ```
-```{r fig.width=4.5,fig.height=3}
+```{r fig.width=4.5,fig.height=3, eval=FALSE}
 ## More dandelions
 dandelion.plot(methy, features, ranges=gr, type="circle", maxgaps=1/100)
 ```
@@ -87,7 +87,7 @@ dandelion.plot(methy, features, ranges=gr, type="circle", maxgaps=maxgaps)
 
 ## Add y-axis (yaxis)
 Set yaxis to TRUE to add y-axis, and set `heightMethod`=`mean` to use the mean score as the height.
-```{r fig.width=4.5,fig.height=3}
+```{r fig.width=4.5,fig.height=3, eval=FALSE}
 dandelion.plot(methy, features, ranges=gr, type="pie", 
                maxgaps=1/100, yaxis = TRUE, heightMethod = mean,
                ylab='mean of methy scores')
@@ -96,14 +96,6 @@ dandelion.plot(methy, features, ranges=gr, type="pie",
 yaxis = c(0, 0.5, 1)
 dandelion.plot(methy, features, ranges=gr, type="pie", 
                maxgaps=1/100, yaxis = yaxis, heightMethod = mean,
-               ylab='mean of methy scores')
-```
-
-```{r fig.width=4.5,fig.height=3}
-# subset the data to test when all values smaller than 1
-methy <- methy[methy$score<1]
-dandelion.plot(methy, features, ranges=gr, type="pie", 
-               maxgaps=1/100, yaxis = TRUE, heightMethod = mean,
                ylab='mean of methy scores')
 ```
 

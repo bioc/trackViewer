@@ -208,40 +208,43 @@ viewTracks(trackListW, gr=grW, viewerStyle=viewerStyleW)
 # Operators
 If you are interested in drawing a combined track from two input tracks, e.g, adding or substractiong one from the other, then you can try one of the operators such as + and - as showing below.
 
-```{r viewTracksOperator1,fig.cap='show data with operator "+"',fig.width=8,fig.height=4}
+```{r viewTracksOperator1}
 newtrack <- repA
 ## Must keep the same format for dat and dat2
 newtrack <- parseWIG(newtrack, "chr11", 122929275, 122930122)
 newtrack$dat2 <- newtrack$dat
 newtrack$dat <- fox2$dat2
 setTrackStyleParam(newtrack, "color", c("#4A95E0", "#CF5D6D"))
-viewTracks(trackList(newtrack, trs), 
+```
+
+```{r viewTracksOperatorplus,fig.cap='show data with operator "+"',fig.width=8,fig.height=4, eval=FALSE}
+viewTracks(trackList(newtrack), 
            gr=gr, viewerStyle=viewerStyle, operator="+")
 ```
 
-```{r viewTracksOperator2,fig.cap='show data with operator "-"',fig.width=8,fig.height=4}
+```{r viewTracksOperatorminus,fig.cap='show data with operator "-"',fig.width=8,fig.height=4, eval=FALSE}
 viewTracks(trackList(newtrack, trs), gr=gr, viewerStyle=viewerStyle, operator="-")
 ```
 
 Multiple operators are acceptable.
 
-```{r viewTracksOperator3,fig.cap='show data with multiple operators', fig.width=8,fig.height=5}
-viewTracks(trackList(newtrack, newtrack, newtrack, trs), gr=gr, viewerStyle=viewerStyle, operator=c(NA, "-", "+"))
+```{r viewTracksOperator3,fig.cap='show data with multiple operators', fig.width=8,fig.height=4}
+viewTracks(trackList(newtrack, newtrack, newtrack), gr=gr, viewerStyle=viewerStyle, operator=c(NA, "-", "+"))
 ```
 
 Alternatively, you can try **GRoperator** before viewing tracks.
 
-```{r viewTracksOperator4,fig.cap='show data with operator "-"',fig.width=8,fig.height=4}
+```{r viewTracksOperator4,fig.cap='show data with operator "-"',fig.width=8,fig.height=4, eval=FALSE}
 newtrack$dat <- GRoperator(newtrack$dat, newtrack$dat2, col="score", operator="-")
 newtrack$dat2 <- GRanges()
-viewTracks(trackList(newtrack, trs), gr=gr, viewerStyle=viewerStyle)
+viewTracks(trackList(newtrack), gr=gr, viewerStyle=viewerStyle)
 ```
 
 # Lolliplot
 The `lolliplot` function is for the visualization of the methylation/variant/mutation data. 
 For more details, please refer [vignette lollipopPlot](lollipopPlot.html).
 
-```{r}
+```{r lolliplot, fig.width=7,fig.height=3.5}
 library(trackViewer)
 features <- GRanges("chr1", IRanges(c(1, 501, 1001), 
                                     width=c(120, 400, 405),
@@ -261,7 +264,7 @@ lolliplot(sample.gr, features)
 Dandelion Plot is used to plot high dense of mutation/methylation data.
 For more details, please refer [vignette dandelionPlot](dandelionPlot.html).
 
-```{r fig.width=4.5,fig.height=3}
+```{r dandelionplot,fig.width=4.5,fig.height=3}
 library(trackViewer)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
@@ -282,7 +285,7 @@ dandelion.plot(methy, features, ranges=gr, type="pin")
 Plot chromatin interactions heatmap as tracks.
 For more details, please refer [vignette plotInteractionData](plotInteractionData.html).
 
-```{r}
+```{r interactionplot}
 library(InteractionSet)
 gi <- readRDS(system.file("extdata", "nij.chr6.51120000.53200000.gi.rds", package="trackViewer"))
 head(gi)
@@ -297,26 +300,6 @@ setTrackStyleParam(tr, "color",
                    c("lightblue", "yellow", "red"))
 viewTracks(trackList(ctcf, tr, heightDist=c(1, 3)), gr=range,
            autoOptimizeStyle = TRUE)
-```
-
-# Ideogram Plot
-
-Plot ideograms with a list of chromosomes and a genome.
-```{r eval=FALSE}
-ideo <- loadIdeogram("hg38", chrom=c("chr1", "chr3", "chr4", 'chr21', "chr22"))
-```
-```{r echo=FALSE, results="hide"}
-path <- system.file("extdata", "ideo.hg38.rds", package = "trackViewer")
-ideo <- readRDS(path)
-```
-```{r, eval=FALSE}
-dataList <- trim(ideo)
-dataList$score <- as.numeric(as.factor(dataList$gieStain))
-dataList <- dataList[dataList$gieStain!="gneg"]
-dataList <- GRangesList(dataList)
-ideogramPlot(ideo, dataList, 
-            layout=list("chr1", c("chr3", "chr22"), 
-                        c("chr4", "chr21")))
 ```
 
 # Web application of **trackViewer**

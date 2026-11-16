@@ -28,20 +28,21 @@ suppressPackageStartupMessages({
   library(httr)
 })
 knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+set.seed(42)
 ```
 
 # Lolliplot
 
 Lolliplot is for the visualization of the methylation/variant/mutation data. 
 
-```{r lolliplot1, fig.width=6, fig.height=3}
+```{r lolliplot1, fig.width=6, fig.height=2.25}
 library(trackViewer)
 SNP <- c(10, 12, 1400, 1402)
 sample.gr <- GRanges("chr1", IRanges(SNP, width=1, names=paste0("snp", SNP)))
 features <- GRanges("chr1", IRanges(c(1, 501, 1001), 
                                     width=c(120, 400, 405),
                                     names=paste0("block", 1:3)))
-lolliplot(sample.gr, features)
+# lolliplot(sample.gr, features) # try this by yourself
 ## More SNPs
 SNP <- c(10, 100, 105, 108, 400, 410, 420, 600, 700, 805, 840, 1400, 1402)
 sample.gr <- GRanges("chr1", IRanges(SNP, width=1, names=paste0("snp", SNP)))
@@ -51,17 +52,24 @@ lolliplot(sample.gr, unname(features), ranges = GRanges("chr1", IRanges(104, 109
 ```
 
 ## Change the lolliplot color
-### Change the color of the features.
-```{r lolliplot2, fig.width=6, fig.height=3}
-features$fill <- c("#FF8833", "#51C6E6", "#DFA32D")
+### Change the color and height of the features.
+```{r lolliplot2, fig.width=6, fig.height=2.5}
+features$fill <- c("#FF8833", "#51C6E6", "#DFA32D") # change the color
+features$height <- c(0.02, 0.05, 0.08) # change height by unit 'npc'/percentage
+lolliplot(sample.gr, features)
+## Specifying the height by unit
+features$height <- list(unit(1/16, "inches"),
+                        unit(3, "mm"),
+                        unit(12, "points"))
 lolliplot(sample.gr, features)
 ```
 
+
 ### Change the color and opacity of the lollipop.
-```{r lolliplot3, fig.width=6, fig.height=3}
-sample.gr$color <- sample.int(6, length(SNP), replace=TRUE)
-sample.gr$border <- sample(c("gray80", "gray30"), length(SNP), replace=TRUE)
-sample.gr$alpha <- sample(100:255, length(SNP), replace = TRUE)/255
+```{r lolliplot3, fig.width=6, fig.height=2.5}
+sample.gr$color <- sample.int(6, length(SNP), replace=TRUE) # color
+sample.gr$border <- sample(c("gray80", "gray30"), length(SNP), replace=TRUE) #border
+sample.gr$alpha <- sample(100:255, length(SNP), replace = TRUE)/255 # transparency
 lolliplot(sample.gr, features)
 ```
 
@@ -70,7 +78,7 @@ lolliplot(sample.gr, features)
 Users can control the node labels one by one by setting metadata start with 'node.label.' 
 Please note that for each node label, the node.label.gp must be a list to control the style of node labels.
 You can also simply use node.label.col, node.label.cex, node.label.fontsize, node.label.fontfamily, node.label.fontface, node.label.font to assign the node labels attributes.
-```{r lolliplot.index, fig.width=6, fig.height=3}
+```{r lolliplot.index, fig.width=6, fig.height=2.5}
 sample.gr$node.label <- as.character(seq_along(sample.gr))
 sample.gr$node.label.col <- 
   ifelse(sample.gr$alpha>0.5 | sample.gr$color==1, "white", "black")
@@ -79,20 +87,9 @@ lolliplot(sample.gr, features)
 sample.gr$node.label.cex <- 1 ## change it back for pretty showcase.
 ```
 
-## Change the height of the features
-```{r lolliplot4, fig.width=6, fig.height=3}
-features$height <- c(0.02, 0.05, 0.08)
-lolliplot(sample.gr, features)
-## Specifying the height and its unit
-features$height <- list(unit(1/16, "inches"),
-                        unit(3, "mm"),
-                        unit(12, "points"))
-lolliplot(sample.gr, features)
-```
-
 ## Plot multiple transcripts in the features
 The metadata 'featureLayerID' are used for drawing features in different layers.
-```{r lolliplot.mul.features, fig.width=6, fig.height=3}
+```{r lolliplot.mul.features, fig.width=6, fig.height=2.75}
 features.mul <- rep(features, 2)
 features.mul$height[4:6] <- list(unit(1/8, "inches"),
                                  unit(0.5, "lines"),
@@ -105,31 +102,29 @@ features.mul$featureLayerID <-
 names(features.mul) <- 
     paste(features.mul$featureLayerID, 
           rep(1:length(features), 2), sep="_")
-lolliplot(sample.gr, features.mul)
+# lolliplot(sample.gr, features.mul) # this line will create multiple legend for each tx
 ## One name per transcript
 names(features.mul) <- features.mul$featureLayerID
 lolliplot(sample.gr, features.mul)
 ```
 
 ## Change the height of a lollipop plot
-```{r lolliplot4.1, fig.width=6, fig.height=3.5}
+```{r lolliplot4.1, fig.width=6, fig.height=3}
 #Note: the score value is an integer less than 10
 sample.gr$score <- sample.int(5, length(sample.gr), replace = TRUE)
 lolliplot(sample.gr, features)
-##Remove y-axis
-lolliplot(sample.gr, features, yaxis=FALSE)
 ```
-```{r lolliplot4.20, fig.width=6, fig.height=4.5}
+```{r lolliplot4.20, fig.width=6, fig.height=4}
 #Try a score value greater than 10
 sample.gr$score <- sample.int(15, length(sample.gr), replace=TRUE)
 sample.gr$node.label <- as.character(sample.gr$score)
 lolliplot(sample.gr, features)
 ```
-```{r lolliplot4.21, fig.width=6, fig.height=5}
+```{r lolliplot4.21, fig.width=6, fig.height=4.5}
 #increase the cutoff value of style switch.
 lolliplot(sample.gr, features, lollipop_style_switch_limit=15)
 ```
-```{r lolliplot4.22, fig.width=6, fig.height=4.5}
+```{r lolliplot4.22, fig.width=6, fig.height=4}
 #Try a float numeric score
 sample.gr$score <- runif(length(sample.gr))*10
 sample.gr$node.label <- as.character(round(sample.gr$score, digits = 1))
@@ -140,7 +135,7 @@ sample.gr$alpha <- NULL
 ```
 
 ## Customize the x-axis label position
-```{r lolliplot.xaxis, fig.width=6, fig.height=4.5}
+```{r lolliplot.xaxis, fig.width=6, fig.height=3.5}
 xaxis <- c(1, 200, 400, 701, 1000, 1200, 1402) ## define the position
 lolliplot(sample.gr, features, xaxis=xaxis)
 names(xaxis) <- xaxis # define the labels
@@ -149,7 +144,7 @@ lolliplot(sample.gr, features, xaxis=xaxis)
 ```
 
 ## Customize the y-axis label position
-```{r lolliplot.yaxis, fig.width=6, fig.height=4.5}
+```{r lolliplot.yaxis, fig.width=6, fig.height=3.5}
 #yaxis <- c(0, 5) ## define the position
 #lolliplot(sample.gr, features, yaxis=yaxis)
 yaxis <- c(0, 5, 10, 15) ## define the position
@@ -159,13 +154,19 @@ lolliplot(sample.gr, features, yaxis=yaxis)
 ```
 
 ## Jitter the label
-```{r lolliplot.jitter, fig.width=6, fig.height=4.5}
+```{r lolliplot.jitter, fig.width=6, fig.height=3.75}
 sample.gr$dashline.col <- sample.gr$color
 lolliplot(sample.gr, features, jitter="label")
 ```
 
+## Remove y-axis
+```{r lolliplot.noy, fig.width=6, fig.height=3.75}
+lolliplot(sample.gr, features, yaxis=FALSE)
+```
+
+
 ## Add a legend
-```{r lolliplot.legend, fig.width=6, fig.height=4.5}
+```{r lolliplot.legend, fig.width=6, fig.height=4.1}
 legend <- 1:6 ## legend fill color
 names(legend) <- paste0("legend", letters[1:6]) ## legend labels
 lolliplot(sample.gr, features, legend=legend)
@@ -177,20 +178,26 @@ lolliplot(sample.gr, features, legend=legend)
 ## if you have multiple tracks, please try to set the legend by list.
 ## see more examples in the section [Plot multiple samples](#plot-multiple-samples)
 legendList <- list(legend)
-lolliplot(sample.gr, features, legend=legendList)
+# lolliplot(sample.gr, features, legend=legendList) # will create same plot as above.
 
 # from version 1.21.8, users can also try to set legend 
 # as a column name in the metadata of GRanges.
 sample.gr.newlegend <- sample.gr
 sample.gr.newlegend$legend <- LETTERS[sample.gr$color]
 lolliplot(sample.gr.newlegend, features, legend="legend")
+```
+```{r lolliplot.legend2, fig.width=6, fig.height=3.5}
 # from version 1.41.6, users can set the legend position to right
 lolliplot(sample.gr, features, legend=legend,
           legendPosition = list(position='right',
                                 width=unit(1, 'inch')))
+```
+```{r lolliplot.legend3, fig.width=7, fig.height=3}
 ## use ncol or nrow to control the legend layout.
 legendList[[1]]$ncol <- 2 # if legend is not a list of list, use legend$ncol <- 2
-lolliplot(sample.gr, features, legend=legendList, legendPosition = 'right')
+lolliplot(sample.gr, features, legend=legendList,
+          legendPosition = list(position='right',
+                                width=unit(2, 'inch')))
 ```
 
 ## Control the labels
@@ -202,31 +209,33 @@ The parameter is used for [grid.text](https://www.rdocumentation.org/packages/gr
 
 ```{r lolliplot.labels.control, fig.width=6, fig.height=4}
 sample.gr.rot <- sample.gr
-sample.gr.rot$label.parameter.rot <- 45
-lolliplot(sample.gr.rot, features, legend=legend)
+# sample.gr.rot$label.parameter.rot <- 45
+# lolliplot(sample.gr.rot, features, legend=legend)
 sample.gr.rot$label.parameter.rot <- 60
+# assign single color
 sample.gr.rot$label.parameter.col <- "brown"
+## try different colors
+sample.gr.rot$label.parameter.col <- sample.int(7,
+                                                length(sample.gr),
+                                                replace = TRUE)
 ## change the label text into user-defined names other than names of the sample.gr
 sample.gr.rot$label.parameter.label <- names(sample.gr)
 random_ids <- sample(seq_along(sample.gr), 5)
 sample.gr.rot$label.parameter.label[random_ids] <- 
   paste("new label", random_ids)
+## remove some labels by setting the label.parameter.label to NA
 random_ids <- sample(seq_along(sample.gr), 2)
-sample.gr.rot$label.parameter.label[random_ids] <- NA ## remove some labels
-lolliplot(sample.gr.rot, features, legend=legend)
-## try different colors
-sample.gr.rot$label.parameter.col <- sample.int(7,
-                                                length(sample.gr),
-                                                replace = TRUE)
+sample.gr.rot$label.parameter.label[random_ids] <- NA
+ ## another method to remove the first label
 sample.gr.rot$label.parameter.draw <- TRUE
-sample.gr.rot$label.parameter.draw[[1]] <- FALSE ## another method to remove the first label
+sample.gr.rot$label.parameter.draw[[1]] <- FALSE
 lolliplot(sample.gr.rot, features, legend=legend)
 ```
 
 Users can also control the labels one by one by setting label.parameter.gp. 
 Please note that for each label, the label.parameter.gp must be a list.
 
-```{r lolliplot.labels.ctl.one.by.one, fig.width=6, fig.height=4}
+```{r lolliplot.labels.ctl.one.by.one, fig.width=6, fig.height=3.2}
 label.parameter.gp.brown <- gpar(col="brown")
 label.parameter.gp.blue <- gpar(col="blue")
 label.parameter.gp.red <- gpar(col="red")
@@ -234,19 +243,15 @@ sample.gr$label.parameter.gp <- sample(list(label.parameter.gp.blue,
                                             label.parameter.gp.brown,
                                             label.parameter.gp.red),
                                        length(sample.gr), replace = TRUE)
-lolliplot(sample.gr, features)
-```
-
-User can write the labels of the features directly on them and not in the 
-legend by set the parameter label_on_feature to `TRUE`.
-```{r lolliplot.labels.on.feature, fig.width=6, fig.height=4}
+#by set the parameter label_on_feature to `TRUE` to directly labels features in 
+# the plot region.
 lolliplot(sample.gr, features, label_on_feature=TRUE)
 ```
 
 Please note that **lolliplot** does not support any parameters to set the title and xlab. If you want to 
 add the title and xlab, please try to add them by [grid.text](https://www.rdocumentation.org/packages/grid/topics/grid.text).
-```{r lolliplot.xlab.ylab.title, fig.width=6, fig.height=5.2}
-lolliplot(sample.gr.rot, features, legend=legend, ylab="y label here")
+```{r lolliplot.xlab.ylab.title, fig.width=6, fig.height=4}
+lolliplot(sample.gr.rot, features, ylab="y label here")
 grid.text("label of x-axis here", x=.5, y=.01, just="bottom")
 grid.text("title here", x=.5, y=.98, just="top", 
           gp=gpar(cex=1.5, fontface="bold"))
@@ -257,7 +262,7 @@ The parameters are controlled by the parameters of labels by naming
 the metadata start as label.parameter such as label.parameter.pfm or 
 label.parameter.font. The parameter is used for [plotMotifLogoA](https://www.rdocumentation.org/packages/motifStack/topics/plotMotifLogoA).
 
-```{r lolliplot.motiflogo, fig.width=6, fig.height=5.2}
+```{r lolliplot.motiflogo, fig.width=6, fig.height=4.1}
 library(motifStack)
 pcms<-readPCM(file.path(find.package("motifStack"), "extdata"),"pcm$")
 sample.gr.rot$label.parameter.pfm <- pcms[sample(seq_along(pcms),
@@ -270,13 +275,15 @@ lolliplot(sample.gr.rot, features, legend=legend)
 
 ### Change the shape for "circle" plot
 
-```{r lolliplotShape, fig.width=6, fig.height=4.5}
+```{r lolliplotShape, fig.width=6, fig.height=4}
 ## shape must be "circle", "square", "diamond", "triangle_point_up", or "triangle_point_down"
 available.shapes <- c("circle", "square", "diamond", 
                       "triangle_point_up", "triangle_point_down")
 sample.gr$shape <- sample(available.shapes, size = length(sample.gr), replace = TRUE)
 sample.gr$legend <- paste0("legend", as.numeric(factor(sample.gr$shape)))
 lolliplot(sample.gr, features, type="circle", legend = "legend")
+```
+```{r lolliplotShape2, fig.width=6, fig.height=3.5}
 sample.gr.mul.shape <- sample.gr
 sample.gr.mul.shape$score <- ceiling(sample.gr.mul.shape$score)
 sample.gr.mul.shape$shape <- lapply(sample.gr.mul.shape$score, function(s){
@@ -290,8 +297,8 @@ lolliplot(sample.gr.mul.shape, features, type="circle",
 ```
 
 ### Google pin
-```{r lolliplot5, fig.width=6, fig.height=4.5}
-lolliplot(sample.gr, features, type="pin")
+```{r lolliplot5, fig.width=6, fig.height=3.5}
+# lolliplot(sample.gr, features, type="pin")
 sample.gr$color <- lapply(sample.gr$color, function(.ele) c(.ele, sample.int(6, 1)))
 sample.gr$border <- sample.int(6, length(SNP), replace=TRUE)
 lolliplot(sample.gr, features, type="pin")
@@ -318,7 +325,7 @@ lolliplot(sample.gr.flag, features,
 ```
 
 ### Pie plot
-```{r lolliplot6, fig.width=6, fig.height=3}
+```{r lolliplot6, fig.width=6, fig.height=2.5}
 sample.gr$score <- NULL ## must be removed, because pie will consider all the numeric columns except column "color", "fill", "alpha", "shape", "lwd", "id" and "id.col".
 sample.gr$label <- NULL
 sample.gr$node.label.col <- NULL
@@ -334,7 +341,7 @@ lolliplot(sample.gr, features, type="pie")
 
 ## Plot multiple samples
 ### Multiple layers
-```{r lolliplot7, fig.width=6, fig.height=5.5}
+```{r lolliplot7, fig.width=6, fig.height=5.15}
 SNP2 <- sample(4000:8000, 30)
 x2 <- sample.int(100, length(SNP2), replace=TRUE)
 sample2.gr <- GRanges("chr3", IRanges(SNP2, width=1, names=paste0("snp", SNP2)), 
@@ -355,7 +362,7 @@ lolliplot(list(A=sample.gr, B=sample2.gr),
 ```
 
 Different layouts are also possible.
-```{r lolliplot.multiple.type, fig.width=6, fig.height=7.5}
+```{r lolliplot.multiple.type, fig.width=6, fig.height=7.05}
 sample2.gr$score <- sample2.gr$value1 ## The circle layout needs the score column 
 lolliplot(list(A=sample.gr, B=sample2.gr), 
           list(x=features, y=features2), 
@@ -363,7 +370,7 @@ lolliplot(list(A=sample.gr, B=sample2.gr),
 ```
 
 ### pie.stack layout
-```{r lolliplot.pie.stack, fig.width=6, fig.height=5}
+```{r lolliplot.pie.stack, fig.width=6, fig.height=3.5}
 rand.id <- sample.int(length(sample.gr), 3*length(sample.gr), replace=TRUE)
 rand.id <- sort(rand.id)
 sample.gr.mul.patient <- sample.gr[rand.id]
@@ -401,14 +408,14 @@ lolliplot(sample.gr.mul.patient, features, type="pie.stack",
 Metadata SNPsideID is used to trigger caterpillar layout.
 SNPsideID must be 'top' or 'bottom'.
 
-```{r lolliplot.caterpillar, fig.width=6, fig.height=4}
+```{r lolliplot.caterpillar, fig.width=6, fig.height=3.75}
 sample.gr$SNPsideID <- sample(c("top", "bottom"), 
                                length(sample.gr),
                                replace=TRUE)
 lolliplot(sample.gr, features, type="pie", 
           legend=legends[[1]])
 ```
-```{r lolliplot.caterpillar2, fig.width=6, fig.height=12}
+```{r lolliplot.caterpillar2, fig.width=6, fig.height=11}
 ## Two layers
 sample2.gr$SNPsideID <- "top"
 idx <- sample.int(length(sample2.gr), 15)
@@ -504,7 +511,7 @@ tryCatch({ ## in case the internet connection does not work
 
 
 ## Variant Call Format (VCF) data
-```{r VCF, fig.width=6, fig.height=5}
+```{r VCF, fig.width=6, fig.height=4.25}
 library(VariantAnnotation)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
@@ -559,18 +566,21 @@ If retrieve data via online not work, load the example data locally.
 ```{r methylation.hide, echo=TRUE}
 methy <- import(system.file("extdata", "methy.bed", package="trackViewer"), "BED")
 ```
-```{r fig.width=6,fig.height=4}
+```{r fig.width=6,fig.height=3}
 lolliplot(methy, features, ranges=gr, type="pin")
 ```
 
 ## Change the node size
 In the above example, some of the nodes overlap each other. To change the node size, cex prameter could be used.
-```{r fig.width=6,fig.height=2.5}
+```{r changeNodeSize1,fig.width=6,fig.height=2.5}
 methy$lwd <- .5
 lolliplot(methy, features, ranges=gr, type="pin", cex=.5)
-#lolliplot(methy, features, ranges=gr, type="circle", cex=.5)
+```
+```{r changeNodeSize2,fig.width=6,fig.height=1.5}
 methy$score2 <- max(methy$score) - methy$score
 lolliplot(methy, features, ranges=gr, type="pie", cex=.5)
+```
+```{r changeNodeSize3,fig.width=6,fig.height=2.5}
 ## We can change it one by one
 methy$cex <- runif(length(methy))
 lolliplot(methy, features, ranges=gr, type="pin")
@@ -582,7 +592,7 @@ In the above examples, some of the nodes are moved too far from the original coo
 To rescale, the x-axis could be reset as below.
 ```{r fig.width=6,fig.height=2.5}
 methy$cex <- 1
-lolliplot(methy, features, ranges=gr, rescale = TRUE)
+#lolliplot(methy, features, ranges=gr, rescale = TRUE)
 ## by set percentage for features and non-features segments
 xaxis <- c(50968014, 50968514, 50968710, 50968838, 50970514)
 rescale <- c(.3, .4, .3)
@@ -627,13 +637,13 @@ In the above examples, people may be misled when the x-axis is ignored.
 It will be better to plot the data into multiple layers. This can be done by
 setting parameter `ranges` into a `GRangesList` object.
 
-```{r fig.width=9,fig.height=8}
+```{r fig.width=9,fig.height=6.5}
 grSplited <- tile(gr, n=2)
 lolliplot(methy, features, ranges=grSplited, type="pin")
 ```
 
 # Plot the lollipop plot with the coverage and annotation tracks
-```{r fig.width=8,fig.height=4}
+```{r fig.width=8,fig.height=2.75}
 gene <- geneTrack(get("HSPA8", org.Hs.egSYMBOL2EG), TxDb.Hsapiens.UCSC.hg19.knownGene)[[1]]
 SNPs <- GRanges("chr11", IRanges(sample(122929275:122930122, size = 20), width = 1), strand="-")
 SNPs$score <- sample.int(5, length(SNPs), replace = TRUE)
@@ -648,12 +658,14 @@ repA <- importScore(file.path(extdata, "cpsf160.repA_-.wig"),
                     format="WIG")
 fox2 <- importScore(file.path(extdata, "fox2.bed"), format="BED",
                     ranges=GRanges("chr11", IRanges(122830799, 123116707)))
-optSty <- optimizeStyle(trackList(repA, fox2, gene), theme="col")
+optSty <- optimizeStyle(trackList(fox2, gene), theme="col")
 trackList <- optSty$tracks
 viewerStyle <- optSty$style
 gr <- GRanges("chr11", IRanges(122929275, 122930122))
-setTrackStyleParam(trackList[[3]], "ylabgp", list(cex=.8))
+setTrackStyleParam(trackList[[2]], "ylabgp", list(cex=.8))
 vp <- viewTracks(trackList, gr=gr, viewerStyle=viewerStyle)
+```
+```{r fig.width=8,fig.height=4}
 ## lollipopData track
 SNPs2 <- GRanges("chr11", IRanges(sample(122929275:122930122, size = 30), width = 1), strand="-")
 SNPs2 <- c(SNPs2, promoters(gene$dat, upstream = 0, downstream = 1))
@@ -670,6 +682,8 @@ gr <- GRanges("chr11", IRanges(122929275, 122930122))
 setTrackStyleParam(trackList[[2]], "ylabgp", list(cex=.8))
 vp <- viewTracks(trackList, gr=gr, viewerStyle=viewerStyle)
 addGuideLine(122929538, vp=vp)
+```
+```{r fig.width=8,fig.height=3}
 ## plot with customized geneTrack
 dat <- gene$dat
 mcols(dat) <- NULL

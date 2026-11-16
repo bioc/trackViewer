@@ -95,7 +95,8 @@ setTrackStyleParam(back2back, "color",
 ## chang the lim of y-axis (by default, [0, 1])
 setTrackStyleParam(back2back, "ylim", c(0, .5))
 viewTracks(trackList(ctcf, back2back, heightDist=c(1, 5)),
-           gr=range, autoOptimizeStyle = TRUE)
+           gr=GRanges("chr6", IRanges(51350000, 53100000)),
+           autoOptimizeStyle = TRUE)
 addInteractionAnnotation(tads, "back2back", grid.lines,
                          gp=gpar(col="cyan", lwd=3, lty=2))
 addInteractionAnnotation(-52208000, "back2back", gp=gpar(col="blue", lwd=3),
@@ -106,14 +107,14 @@ addInteractionAnnotation(51508000, "back2back", gp=gpar(col="gray", lwd=3, lty=2
 
 Plot chromatin interactions track as links.
 
-```{r plotLinks, fig.width=6, fig.height=3}
+```{r plotLinks, fig.width=6, fig.height=2}
 setTrackStyleParam(heatmap, "tracktype", "link")
 setTrackStyleParam(heatmap, "breaks", 
                    c(seq(from=0, to=50, by=10), 200))
 setTrackStyleParam(heatmap, "color",
                    c("lightblue", "yellow", "red"))
 ## filter the links to simulate the real data
-keep <- distance(heatmap$dat, heatmap$dat2) > 5e5 & heatmap$dat$score>20
+keep <- distance(heatmap$dat, heatmap$dat2) > 5e5 & heatmap$dat$score>25
 heatmap$dat <- heatmap$dat[keep]
 heatmap$dat2 <- heatmap$dat2[keep]
 viewTracks(trackList(heatmap), gr=range, autoOptimizeStyle = TRUE)
@@ -121,7 +122,7 @@ viewTracks(trackList(heatmap), gr=range, autoOptimizeStyle = TRUE)
 
 Plot links with heatmap.
 
-```{r plotHeatmapLink, fig.width=6, fig.height=4}
+```{r plotHeatmapLink, fig.width=6, fig.height=3}
 heatmapLinks <- gi2track(gi, gi2[keep])
 ## change the color
 setTrackStyleParam(heatmapLinks, "breaks", 
