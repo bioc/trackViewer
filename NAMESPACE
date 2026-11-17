@@ -126,6 +126,10 @@ importFrom(grImport,
   grid.picture,
   readPicture
 )
+importFrom(methods,
+  slot,
+  slotNames
+)
 importFrom(rhdf5,
   H5Fopen,
   H5close,

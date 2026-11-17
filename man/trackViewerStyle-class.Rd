@@ -4,12 +4,15 @@
 \name{trackViewerStyle-class}
 \alias{trackViewerStyle-class}
 \alias{trackViewerStyle}
+\alias{show,trackViewerStyle-method}
 \alias{setTrackViewerStyleParam}
 \alias{setTrackViewerStyleParam,trackViewerStyle,character-method}
 \alias{setTrackViewerStyleParam,trackViewerStyle,character,ANY-method}
 \title{Class \code{"trackViewerStyle"}}
 \usage{
 trackViewerStyle(...)
+
+\S4method{show}{trackViewerStyle}(object)
 
 setTrackViewerStyleParam(tvs, attr, value)
 
@@ -18,6 +21,8 @@ setTrackViewerStyleParam(tvs, attr, value)
 \arguments{
 \item{\dots}{Each argument in \dots becomes an slot in the new trackViewerStyle.}
 
+\item{object}{an object of trackViewerStyle.}
+
 \item{tvs}{An object of \code{trackViewerStyle}.}
 
 \item{attr}{the name of slot to be changed.}
@@ -25,6 +30,8 @@ setTrackViewerStyleParam(tvs, attr, value)
 \item{value}{values to be assigned.}
 }
 \value{
+An object of trackViewerStyle.
+
 An object of class \code{\link{trackViewerStyle}} with the modified
 slot, returned invisibly. The variable supplied as \code{tvs} is updated as
 a side effect.

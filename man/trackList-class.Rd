@@ -4,14 +4,19 @@
 \name{trackList-class}
 \alias{trackList-class}
 \alias{trackList}
+\alias{show,trackList-method}
 \alias{seqlevelsStyle<-,trackList-method}
 \title{List of tracks}
 \usage{
+\S4method{show}{trackList}(object)
+
 \S4method{seqlevelsStyle}{trackList}(x) <- value
 
 trackList(..., heightDist = NA)
 }
 \arguments{
+\item{object}{An object of trackList.}
+
 \item{x}{trackList object.}
 
 \item{value}{values to be assigned.}
@@ -21,6 +26,9 @@ trackList, in the same order. This is analogous to the list constructor, except
 every argument in ... must be derived from \code{\link{track}}.}
 
 \item{heightDist}{A vector or NA to define the height of each track.}
+}
+\value{
+An object of trackList.
 }
 \description{
 An extension of List that holds only \code{\link{track}} objects.

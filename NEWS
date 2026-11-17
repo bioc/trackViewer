@@ -1,5 +1,9 @@
 Changes in version 1.49.4
 
+    o Fix multiple warning in BiocCheck.
+    
+Changes in version 1.49.4
+
     o Decrease the documentation size.
     
 Changes in version 1.49.3

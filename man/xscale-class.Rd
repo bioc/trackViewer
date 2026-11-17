@@ -4,7 +4,17 @@
 \name{xscale-class}
 \alias{xscale-class}
 \alias{xscale}
+\alias{show,xscale-method}
 \title{Class \code{"xscale"}}
+\usage{
+\S4method{show}{xscale}(object)
+}
+\arguments{
+\item{object}{an object of xscale.}
+}
+\value{
+An object of xscale.
+}
 \description{
 An object of class \code{"xscale"} represents x-scale style.
 }

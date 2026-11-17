@@ -17,6 +17,9 @@ addGuideLine(guideLine, col = "gray", lty = "dashed", lwd = 1, vp = NULL)
 
 \item{vp}{A Grid viewport object. It must be output of \code{\link{viewTracks}}}
 }
+\value{
+There is no returns.
+}
 \description{
 A function to add lines for emphasizing the positions
 }

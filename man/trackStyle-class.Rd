@@ -4,12 +4,13 @@
 \name{trackStyle-class}
 \alias{trackStyle-class}
 \alias{trackStyle}
+\alias{show,trackStyle-method}
 \alias{track-class}
 \alias{track}
+\alias{show,track-method}
 \alias{seqlevels,track-method}
 \alias{seqlevelsStyle,track-method}
 \alias{seqlevelsStyle<-,track-method}
-\alias{show,track-method}
 \alias{$,track-method}
 \alias{$,trackStyle-method}
 \alias{$<-,track-method}
@@ -27,13 +28,15 @@
 \alias{setTrackYaxisParam,track,character,ANY-method}
 \title{Class \code{"trackStyle"}}
 \usage{
+\S4method{show}{trackStyle}(object)
+
+\S4method{show}{track}(object)
+
 \S4method{seqlevels}{track}(x)
 
 \S4method{seqlevelsStyle}{track}(x)
 
 \S4method{seqlevelsStyle}{track}(x) <- value
-
-\S4method{show}{track}(object)
 
 \S4method{$}{track}(x, name)
 
@@ -56,11 +59,11 @@ setTrackYaxisParam(ts, attr, value)
 \S4method{setTrackYaxisParam}{track,character}(ts, attr, value)
 }
 \arguments{
+\item{object}{an object of track or trackStyle}
+
 \item{x}{an object of trackStyle or track}
 
 \item{value}{values to be assigned.}
-
-\item{object}{an object of trackStyle.}
 
 \item{name}{slot name of trackStyle or track}
 
@@ -71,6 +74,10 @@ setTrackYaxisParam(ts, attr, value)
 \item{attr}{the name of slot of \code{\link{trackStyle}} object to be changed.}
 }
 \value{
+An object of trackStyle.
+
+An object of track.
+
 An object of class \code{\link{track}} with the modified style,
 returned invisibly. The variable supplied as \code{ts} is updated as a side
 effect.

@@ -4,7 +4,17 @@
 \name{pos-class}
 \alias{pos-class}
 \alias{pos}
+\alias{show,pos-method}
 \title{Class \code{"pos"}}
+\usage{
+\S4method{show}{pos}(object)
+}
+\arguments{
+\item{object}{an object of pos.}
+}
+\value{
+An object of pos.
+}
 \description{
 An object of class \code{"pos"} represents a point location
 }

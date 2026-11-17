@@ -7,7 +7,7 @@
 #' @param vp A Grid viewport object. It must be output of \code{\link{viewTracks}}
 #' @import grid
 #' @export
-#' @return NULL
+#' @return There is no returns.
 #' @seealso See Also as \code{\link{getCurTrackViewport}}, \code{\link{addArrowMark}}, 
 #' \code{\link{viewTracks}}
 #' @examples

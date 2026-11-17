@@ -36,13 +36,13 @@ importData <-
     function(files, 
              format=NA,
              ranges=GRanges()){
-    stopifnot(class(ranges)=="GRanges")
+    stopifnot(is(ranges, "GRanges"))
     ranges <- reduce(ranges)
     formats <- c("BAM", "BED", "bedGraph", "WIG", "BigWig")
     if(is.na(format[1])){
         format <- vapply(files, file_ext, FUN.VALUE = "BAM") ## need tools package
     }
-    format <- rep(format, length(files))[1:length(files)]
+    format <- rep(format, length(files))[seq_along(files)]
     format <- formats[match(tolower(format), tolower(formats))]
     if(any(is.na(format)))
         stop("Can not determine the file format.",

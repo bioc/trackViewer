@@ -17,6 +17,7 @@
 #' @slot autolas \code{"logical"} automatic determine y label direction
 #' @slot flip \code{"logical"} flip the x-axis or not, default FALSE
 #' @import methods
+#' @return An object of trackViewerStyle.
 #' @exportClass trackViewerStyle
 #' @examples
 #' tvs <- trackViewerStyle()
@@ -58,6 +59,24 @@ setClass("trackViewerStyle",
 trackViewerStyle <- function(...){
     new("trackViewerStyle", ...)
 }
+
+#' @rdname trackViewerStyle-class
+#' @param object an object of trackViewerStyle.
+#' @exportMethod show
+#' 
+#' @aliases show,trackViewerStyle-method
+setMethod("show", "trackViewerStyle", function(object){
+  cat("This is an object of trackViewerStyle",
+      "\nslot margin:", object@margin,
+      "\nslot xlas:", object@xlas,
+      "\nslot xaxis:", object@xaxis,
+      "\nslot xat:", object@xat,
+      "\nslot xlabel:", object@xlabel,
+      "\nslot autolas:", object@autolas,
+      "\nslot flip:", object@flip
+      )
+})
+
 
 #' @rdname trackViewerStyle-class
 #' @param tvs An object of \code{trackViewerStyle}.
@@ -171,6 +190,7 @@ setMethod("setTrackViewerStyleParam",
 #' @slot y A \code{\link{numeric}} value, indicates the y position
 #' @slot unit \code{"character"} apecifying the units for the corresponding
 #' numeric values. See \code{\link[grid]{unit}}
+#' @return An object of pos.
 #' @exportClass pos
 #' 
 setClass("pos", representation(x="numeric", y="numeric", unit="character"),
@@ -184,6 +204,19 @@ setClass("pos", representation(x="numeric", y="numeric", unit="character"),
                  return("unit must be units of grid unit. See ?unit")
              return(TRUE)
          })
+
+#' @rdname pos-class
+#' @param object an object of pos.
+#' @exportMethod show
+#' 
+#' @aliases show,pos-method
+setMethod("show", "pos", function(object){
+  cat("This is an object of pos",
+      "\nslot x:", object@x,
+      "\nslot y:", object@y,
+      "\nslot unit:", object@unit
+  )
+})
 
 #' Class \code{"xscale"}
 #' @description An object of class \code{"xscale"} represents x-scale style.
@@ -199,6 +232,7 @@ setClass("pos", representation(x="numeric", y="numeric", unit="character"),
 #' parameter settings of x-scale.
 #' @slot draw A \code{"logical"} value indicating whether the x-scale
 #' should be draw.
+#' @return An object of xscale.
 #' @exportClass xscale
 
 setClass("xscale",
@@ -209,6 +243,19 @@ setClass("xscale",
                         draw="logical"),
          prototype(draw=FALSE, gp=list())
          )
+
+#' @rdname xscale-class
+#' @param object an object of xscale.
+#' @exportMethod show
+#' 
+#' @aliases show,xscale-method
+setMethod("show", "xscale", function(object){
+  cat("This is an object of xscale",
+      "\nslot x:", object@x,
+      "\nslot y:", object@y,
+      "\nslot unit:", object@unit
+  )
+})
 
 #' Class \code{"yaxisStyle"}
 #' @description An object of class \code{"yaxisStyle"} represents y-axis style.
@@ -225,6 +272,7 @@ setClass("xscale",
 #' @slot main A \code{"logical"} value indicating whether the y-axis
 #' should be draw in left (TRUE) or right (FALSE).
 #' @exportClass yaxisStyle
+#' @return An object of yaxisStyle.
 
 setClass("yaxisStyle",
          representation(at="numeric",
@@ -234,6 +282,20 @@ setClass("yaxisStyle",
                         main="logical"),
          prototype(draw=TRUE, label=FALSE, gp=list(), main=TRUE)
          )
+
+#' @rdname yaxisStyle-class
+#' @param object an object of yaxisStyle
+#' @exportMethod show
+#' 
+#' @aliases show,yaxisStyle-method
+setMethod("show", "yaxisStyle", function(object){
+  cat("This is an object of yaxisStyle",
+      "\nslot at:", object@at,
+      "\nslot draw:", object@draw,
+      "\nslot main:", object@main,
+      "\nslot gp:", object@gp
+  )
+})
 
 #' Class \code{"trackStyle"}
 #' @description An object of class \code{"trackStyle"} represents track style.
@@ -267,6 +329,7 @@ setClass("yaxisStyle",
 #' Default is 0.5, which will split the region half to half. It will only work
 #' for back to back plot.
 #' @exportClass trackStyle
+#' @return An object of trackStyle.
 #'
 
 setClass("trackStyle",
@@ -312,6 +375,17 @@ setClass("trackStyle",
              return(TRUE)
          }
 )
+
+#' @rdname trackStyle-class
+#' @exportMethod show
+#' @importFrom methods slotNames slot
+#' @aliases show,trackStyle-method
+setMethod("show", "trackStyle", function(object){
+  cat("This is an object of trackStyle")
+  for(slt in slotNames(object)){
+    cat('\n slot ', slt, ': ', slot(object, slt))
+  }
+})
 
 #' Class \code{"track"}
 #' @description An object of class \code{"track"} bundles the genomic data to be
@@ -385,6 +459,7 @@ setClass("trackStyle",
 #' plotting range. \code{seqlevelsStyle} and its replacement method are
 #' defined for \code{track} and rename both \code{dat} and \code{dat2} at once.
 #' @exportClass track
+#' @return An object of track.
 #' @examples
 #' extdata <- system.file("extdata", package="trackViewer",
 #' mustWork=TRUE)
@@ -483,6 +558,20 @@ setClass("track", representation(dat="GRanges",
              return(TRUE)
          })
 
+#' @rdname trackStyle-class
+#' @param object an object of track or trackStyle
+#' @exportMethod show
+#' @aliases show,track-method
+setMethod("show", "track", function(object){
+  cat("This is an object of track\n", "slot name:", object@name, "\n", 
+      "slot type:", object@type, "\n", "slot format:", object@format, "\n")
+  cat("slot dat:\n")
+  show(object@dat)
+  cat("slot dat2:\n")
+  show(object@dat2)
+  cat("slot style: try object$style to see details.\n")
+})
+
 #' Method seqlevels
 #' @rdname trackStyle-class
 #' @exportMethod seqlevels
@@ -506,20 +595,6 @@ setReplaceMethod("seqlevelsStyle", "track",
               return(x)
 })
 
-#' @rdname trackStyle-class
-#' @param object an object of trackStyle.
-#' @exportMethod show
-#' 
-#' @aliases show,track-method
-setMethod("show", "track", function(object){
-    cat("This is an object of track\n", "slot name:", object@name, "\n", 
-        "slot type:", object@type, "\n", "slot format:", object@format, "\n")
-    cat("slot dat:\n")
-    show(object@dat)
-    cat("slot dat2:\n")
-    show(object@dat2)
-    cat("slot style: try object$style to see details.\n")
-})
 #' Method $
 #' @rdname trackStyle-class
 #' @param x an object of trackStyle or track
@@ -882,6 +957,7 @@ setMethod("setTrackYaxisParam",
 #' @rdname trackList-class
 #' @aliases trackList
 #' @seealso \code{\link{track}}.
+#' @return An object of trackList.
 #' @exportClass trackList
 
 setClass("trackList", contains="list", representation(names="vector"),
@@ -891,6 +967,18 @@ setClass("trackList", contains="list", representation(names="vector"),
                  return("class of elements should be track")
              return(TRUE)
          })
+
+
+#' @rdname trackList-class
+#' @exportMethod show
+#' @param object An object of trackList.
+#' @importFrom methods slotNames slot
+#' @aliases show,trackList-method
+setMethod("show", "trackList", function(object){
+  cat("This is an object of trackList with length ",
+      length(object),
+      ". It is a list of tracks.")
+})
 
 #' Method seqlevelsStyle<-
 #' @rdname trackList-class

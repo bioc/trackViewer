@@ -88,8 +88,14 @@ browseTracks <- function(trackList,
                        orgFlag <- FALSE
                      }
                    }
-                   require(txdb, character.only = TRUE)
-                   require(org, character.only = TRUE)
+                   if (!requireNamespace(txdb, quietly = TRUE)) {
+                     stop("Package '", txdb, "' is required for this feature. Please install it.",
+                          call. = FALSE)
+                   }
+                   if (!requireNamespace(org, quietly = TRUE)) {
+                     stop("Package '", org, "' is required for this feature. Please install it.",
+                          call. = FALSE)
+                   }
                    trs <- geneModelFromTxdb(get(txdb), get(org), gr=gr)
                    trackList <- c(trackList, trs)
                  },

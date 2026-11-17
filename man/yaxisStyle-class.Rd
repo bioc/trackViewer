@@ -4,7 +4,17 @@
 \name{yaxisStyle-class}
 \alias{yaxisStyle-class}
 \alias{yaxisStyle}
+\alias{show,yaxisStyle-method}
 \title{Class \code{"yaxisStyle"}}
+\usage{
+\S4method{show}{yaxisStyle}(object)
+}
+\arguments{
+\item{object}{an object of yaxisStyle}
+}
+\value{
+An object of yaxisStyle.
+}
 \description{
 An object of class \code{"yaxisStyle"} represents y-axis style.
 }
